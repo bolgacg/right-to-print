@@ -1,0 +1,151 @@
+{
+ "processes": {
+  "lpbf_base": {
+   "label": "Laser powder-bed fusion at the home centre",
+   "envelope_mm": [
+    280,
+    280,
+    365
+   ],
+   "source": "Nikon SLM Solutions SLM 280 build volume 280 x 280 x 365 mm; DTI prints DISCMAM parts on an SLM 280 (AM Media, Jul 2026)",
+   "kind": "fact"
+  },
+  "lpbf_container": {
+   "label": "Laser powder-bed fusion in a deployable container",
+   "envelope_mm": [
+    250,
+    250,
+    300
+   ],
+   "source": "assumed: a container-class LPBF machine one size below the SLM 280; Fieldmade's NOMAD03 envelope is not published in the sources used",
+   "kind": "assumption"
+  },
+  "ded": {
+   "label": "Directed energy deposition (wire or powder, robot-mounted)",
+   "envelope_mm": [
+    1000,
+    1000,
+    800
+   ],
+   "source": "assumed: a robot-cell DED envelope; DTI has tested a Meltio DED system (GTS DED theme day, Sep 2025)",
+   "kind": "assumption"
+  }
+ },
+ "alloys": {
+  "cast aluminium": {
+   "am": "AlSi10Mg",
+   "process": "lpbf",
+   "powder_eur_kg": 80,
+   "deposition_cm3_h": 18,
+   "density_g_cm3": 2.67,
+   "source": "AlSi10Mg is DTI's listed aluminium; DISCMAM's Belgian MoD parts were printed in AlSi10Mg"
+  },
+  "steel": {
+   "am": "1.2709 maraging steel",
+   "process": "lpbf",
+   "powder_eur_kg": 70,
+   "deposition_cm3_h": 10,
+   "density_g_cm3": 8.0,
+   "source": "1.2709 is in DTI's alloy list (tekniq.dk, May 2023)"
+  },
+  "stainless": {
+   "am": "316L",
+   "process": "lpbf",
+   "powder_eur_kg": 65,
+   "deposition_cm3_h": 10,
+   "density_g_cm3": 7.95,
+   "source": "316L parameters co-developed by DTI and SLM Solutions (Apr 2023)"
+  },
+  "titanium": {
+   "am": "Ti6Al4V",
+   "process": "lpbf",
+   "powder_eur_kg": 330,
+   "deposition_cm3_h": 7,
+   "density_g_cm3": 4.43,
+   "source": "Ti6Al4V in DTI's alloy list; CHIPART works on titanium chip recycling"
+  },
+  "nickel superalloy": {
+   "am": "IN625",
+   "process": "lpbf",
+   "powder_eur_kg": 130,
+   "deposition_cm3_h": 8,
+   "density_g_cm3": 8.44,
+   "source": "Inconel 625 in DTI's alloy list"
+  },
+  "copper alloy": {
+   "am": "CuCr1Zr",
+   "process": "lpbf",
+   "powder_eur_kg": 120,
+   "deposition_cm3_h": 9,
+   "density_g_cm3": 8.9,
+   "source": "CuCr1Zr parameters co-developed by DTI and SLM Solutions (Apr 2023)"
+  },
+  "bronze": {
+   "am": null,
+   "process": null,
+   "powder_eur_kg": null,
+   "deposition_cm3_h": null,
+   "density_g_cm3": 8.8,
+   "source": "no bronze in DTI's published alloy list; a bearing bronze part needs a substitution study"
+  },
+  "polymer": {
+   "am": "PA12 (SLS)",
+   "process": "sls",
+   "powder_eur_kg": 60,
+   "deposition_cm3_h": 60,
+   "density_g_cm3": 1.01,
+   "source": "nylon (SLS) is DTI's listed polymer; SLS envelope not modelled here"
+  }
+ },
+ "assumptions": {
+  "powder_price_note": "powder prices are order-of-magnitude assumptions per kilogram, editable in the page",
+  "deposition_note": "single-laser build rates, assumed from public machine literature, editable",
+  "layer_um": 50,
+  "recoat_s": 9,
+  "support_fraction": 0.18,
+  "machine_eur_h": 90,
+  "labour_eur_h": 85,
+  "heat_treatment_eur": 220,
+  "support_removal_h_per_complexity": 2.5,
+  "machining_h": {
+   "fine": 3.0,
+   "medium": 1.0,
+   "coarse": 0.0
+  },
+  "ct_scan_eur": 450,
+  "am_lead_days_base": 4,
+  "am_lead_days_container": 2,
+  "qualification_eur": {
+   "1": 38000,
+   "2": 16000,
+   "3": 4000
+  },
+  "qualification_note": "one-off cost to qualify a part family: witness coupons, CT, engineering time; scaled by criticality; assumed"
+ },
+ "gates": {
+  "density_permanent_pct": 99.9,
+  "density_permanent_source": "DISCMAM's permanent-use density threshold, AM Media, Jul 2026",
+  "density_temporary_pct": 99.5,
+  "density_emergency_pct": 99.0,
+  "tier_note": "the four tiers (permanent, temporary, emergency, scrap) are DISCMAM's; the 99.5 and 99.0 thresholds and the sign-off rules are this console's illustrative policy, not DTI's",
+  "self_supporting_deg": 45,
+  "self_supporting_source": "the usual published rule of thumb for LPBF overhangs; steeper needs support"
+ },
+ "weights": {
+  "technical": {
+   "envelope": "gate",
+   "alloy": 30,
+   "complexity": 25,
+   "tolerance": 20,
+   "mass": 15,
+   "channels": 10
+  },
+  "business": {
+   "lead_time_x_criticality": 40,
+   "obsolescence": 25,
+   "demand_fit": 20,
+   "unit_cost": 15
+  },
+  "note": "weights are this console's; the page prints them so they can be argued with"
+ }
+}

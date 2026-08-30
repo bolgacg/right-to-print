@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which spare parts should a fleet have the right to print?</title>
+<meta name="description" content="A decision console for on-site metal printing of spare parts: which parts to print, whether it is worth it, what a deployable printer buys in readiness, and which acceptance tier a printed part earns. Bolgac Gulen, 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#faf9f7;--ink:#1a1d21;--soft:#5b6470;--faint:#8b95a1;--rule:#e2e0dc;--rule2:#c9c5be;--panel:#f3f1ed;--card:#fff;
+  --pos:#2f7d54;--neg:#b03a3a;--accent:#2c4a6b;--amber:#c8860d;--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;
+  --serif:'Newsreader',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;padding-bottom:110px}
+a{color:var(--accent);text-decoration:none;font-weight:500}a:hover{text-decoration:underline}
+.wrap{max-width:960px;margin:0 auto;padding:0 20px}
+header{padding:48px 0 30px;border-bottom:1px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;color:var(--faint);text-transform:uppercase}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,5vw,54px);line-height:1.08;letter-spacing:-.01em;margin:12px 0 14px;max-width:820px;text-wrap:balance}
+.dek{max-width:780px;color:var(--soft);font-size:18.5px;font-family:var(--serif);line-height:1.5}
+.dek strong{color:var(--ink);font-weight:600}
+.byline{margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--faint);display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+section{padding:44px 0 6px}
+.sec-label{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+h2{font-family:var(--serif);font-weight:600;font-size:29px;line-height:1.2;margin-bottom:10px;text-wrap:balance}
+h3{font-family:var(--serif);font-size:20px;font-weight:600}
+p{margin-bottom:12px}
+.lede{color:var(--soft);max-width:780px;margin-bottom:20px}.lede strong,.lede em{color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:22px 24px;margin-top:16px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:12px;padding:6px 12px;border:1px solid var(--rule2);border-radius:3px;background:var(--card);color:var(--soft);cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--soft)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:500}
+.viz{position:relative}.viz svg{width:100%;height:auto;display:block}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);font:12px var(--mono);padding:6px 8px;border-radius:4px;display:none;white-space:nowrap;z-index:5}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--soft);margin:6px 0 0 4px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:16px;height:0;border-top:2px solid;display:inline-block}.legend i.dot{width:10px;height:10px;border:0;border-radius:50%}
+.verdict{margin-top:16px;padding:2px 0 2px 16px;border-left:3px solid var(--accent);font-size:15px;max-width:780px}
+.verdict.sting{border-left-color:var(--neg)}.verdict b{color:var(--accent)}.verdict.sting b{color:var(--neg)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:right;padding:0 0 8px;border-bottom:1px solid var(--rule)}
+th:first-child{text-align:left}th.l{text-align:left}
+td{padding:8px 0;border-bottom:1px solid var(--rule);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+td:first-child{text-align:left}td.l{text-align:left}th+th,td+td{padding-left:14px}td.num{white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.sel td{background:var(--panel)}
+.tscroll{overflow-x:auto}
+#assump-table td:first-child{width:24%}#assump-table td:nth-child(2){width:26%}#assump-table td:nth-child(3){width:14%;white-space:nowrap}#assump-table td:last-child{min-width:240px}
+#assump-table .pill{white-space:normal;line-height:1.4}
+.note{font-size:12.5px;color:var(--faint);margin-top:10px;line-height:1.5}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.amb{color:var(--amber)}
+.hint{font-size:12px;color:var(--faint);line-height:1.45}
+.pill{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--rule2);border-radius:3px;padding:4px 8px;color:var(--soft);white-space:nowrap}
+.pill.bad{color:var(--neg);border-color:var(--neg)}.pill.mid{color:var(--amber);border-color:var(--amber)}.pill.ok{color:var(--pos);border-color:var(--pos)}.pill.acc{color:var(--accent);border-color:var(--accent)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;max-width:320px;height:3px;background:var(--rule2);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ink);cursor:pointer;border:2px solid var(--paper)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--ink);cursor:pointer;border:2px solid var(--paper)}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 24px;margin-bottom:12px}
+.ctl label{display:block}.ctl .hint{margin-bottom:4px}.ctl .val{font-family:var(--mono);font-size:13px;margin-left:8px}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;background:var(--panel);border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin-top:14px}
+.stat>div{padding:14px 18px;border-left:1px solid var(--rule)}.stat>div:first-child{border-left:none}
+.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.stat .n{font-family:var(--mono);font-size:24px;font-weight:500}.stat .s{font-size:12px;color:var(--soft);margin-top:4px}
+.limits{margin-top:22px;border-left:3px solid var(--neg);padding:2px 0 2px 16px;max-width:780px}.limits p{font-size:14px;color:var(--soft)}
+.small{font-size:13.5px;color:var(--soft)}
+.gloss{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:8px 24px;font-size:13px;color:var(--soft);margin-top:10px}
+.gloss b{color:var(--ink);font-family:var(--mono);font-size:12px;font-weight:500}
+.primer{counter-reset:p;max-width:780px}.primer p{padding-left:34px;position:relative;font-size:16.5px}
+.primer p::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:2px;font-family:var(--mono);font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.quote{border-left:3px solid var(--rule2);padding:2px 0 2px 16px;margin:10px 0;font-family:var(--serif);font-size:17px;color:var(--ink);max-width:780px}
+.quote .who{display:block;font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}.two>div{min-width:0}@media(max-width:700px){.two{grid-template-columns:1fr}}
+.score{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13.5px}.score b{font-family:var(--mono);font-weight:500;font-size:12px}
+.q{font-size:14px;color:var(--ink);padding-left:16px;position:relative;margin-bottom:6px}.q::before{content:"?";position:absolute;left:0;color:var(--accent);font-family:var(--mono)}
+canvas.topo{width:100%;image-rendering:pixelated;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.tierbox{padding:18px 20px;border-radius:6px;border:1px solid var(--rule);background:var(--panel);margin-top:12px}
+.tierbox .t{font-family:var(--serif);font-size:30px;font-weight:600}
+.tierbox .t.permanent{color:var(--pos)}.tierbox .t.temporary{color:var(--amber)}.tierbox .t.emergency{color:var(--neg)}.tierbox .t.scrap{color:var(--soft)}
+footer{border-top:1px solid var(--rule);margin-top:44px;padding:20px 0 30px;font-family:var(--mono);font-size:12px;color:var(--faint)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+#tour{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-top:1px solid var(--rule2);box-shadow:0 -8px 30px rgba(0,0,0,.10);transform:translateY(110%);transition:transform .3s}
+#tour.on{transform:none}
+#tour .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 20px}
+@media(max-width:620px){#tour .wrap{grid-template-columns:1fr auto}#tour .tk{display:none}}
+#tour .tk{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+#tour .tx{font-size:14px;line-height:1.45}#tour .tx b{font-weight:600}
+#tour .nav{display:flex;gap:6px;align-items:center}
+.tbtn{font-family:var(--mono);font-size:12px;padding:8px 13px;border-radius:4px;border:1px solid var(--rule2);background:var(--card);color:var(--soft);cursor:pointer}
+.tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tour-open{font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:4px;border:1px solid var(--accent);background:var(--card);color:var(--accent);cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="eyebrow">A decision console for on-site metal printing &middot; synthetic catalogue, published rules, open code</div>
+  <h1>Which spare parts should a fleet have the right to print?</h1>
+  <p class="dek">A fleet of vehicles, vessels or aircraft waits weeks for spare parts that a metal printer could make in days,
+  at the depot or in a container next to the fleet. Most of those parts should still not be printed. This console takes
+  a catalogue of <strong id="dek-n"></strong> spare parts and answers, part by part, the four questions a
+  sustainment desk asks: <strong>can it be printed, is it worth it, what does a deployable printer buy in readiness,
+  and which acceptance tier does a printed part earn.</strong> At the default settings <strong id="dek-print"></strong>
+  parts are worth printing outright, <strong id="dek-inv"></strong> deserve a closer look, <strong id="dek-leave"></strong>
+  should be left alone, and <strong id="dek-cheaper"></strong>: printing wins on days, not on price.</p>
+  <div class="byline"><span>Bolga&ccedil; G&uuml;len &middot; Odense, 2026</span><span>&middot;</span><a href="https://github.com/bolgacg/right-to-print">source and data</a>
+    <button class="tour-open" id="tourbtn">Walk me through it</button></div>
+</div></header>
+
+<section id="primer"><div class="wrap">
+  <div class="sec-label">Before the console &middot; five things to know</div>
+  <div class="primer">
+    <p><strong>Metal 3D printing</strong> here means laser powder-bed fusion: a laser melts a 50-micron layer of metal powder,
+    a new layer is spread, and the part grows layer by layer inside a machine the size of a wardrobe. Denmark's industrial
+    3D-print centre in Aarhus runs several such machines.</p>
+    <p>A <strong>spare part</strong> is worth printing when the wait for it is long, the platform it belongs to matters, and the
+    supplier is slow, gone or unwilling. It is rarely worth printing on unit price alone.</p>
+    <p>The <strong>right to print</strong> is the licence to make a part from its digital model instead of buying it. Denmark's
+    defence procurement agency has said it now buys that right for some spare parts; the right is worth nothing without the
+    model, the material specification and the load case.</p>
+    <p>A <strong>deployable printer</strong> is a metal printer built into a shipping container so parts can be made where the
+    fleet is. It changes lead time from months to days, for the parts that fit it, as long as powder and printer hours last.</p>
+    <p>A printed part is released into service at an <strong>acceptance tier</strong>. The Danish-led DISCMAM project uses four:
+    permanent, temporary, emergency, scrap, decided from measured density, geometry and coupon tests. Who may sign which tier
+    is a policy, and this console makes that policy explicit.</p>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <div class="sec-label" style="margin-bottom:2px">The domain, drawn once</div>
+    <div class="viz" id="domain-fig"></div>
+    <p class="note">The path a printed spare part takes. The console covers the four decisions in blue. It does not print anything and it does not qualify anything; it decides what to try first.</p>
+  </div>
+  <h3 style="margin-top:24px;font-size:17px">Eight terms used below</h3>
+  <div class="gloss">
+    <div><b>LPBF</b> laser powder-bed fusion, the metal printing process assumed throughout</div>
+    <div><b>DED</b> directed energy deposition: a robot-held laser melts wire or powder onto a surface; larger parts and repairs, rougher finish</div>
+    <div><b>build envelope</b> the largest box a machine can print; a part must fit it in some orientation</div>
+    <div><b>criticality</b> 1 stops the platform, 2 degrades it, 3 is cosmetic or convenience</div>
+    <div><b>lead time</b> days from ordering a part to holding it</div>
+    <div><b>obsolescence</b> the supplier status: active, end of production, or gone</div>
+    <div><b>witness coupon</b> a small test bar printed next to the part and pulled apart to prove the build's material properties</div>
+    <div><b>density</b> how much of the printed volume is solid metal; 99.9 percent is DISCMAM's gate for permanent use, the rest is pores</div>
+  </div>
+</div></section>
+
+<section id="words"><div class="wrap">
+  <div class="sec-label">In the words of the people who own this problem</div>
+  <div class="quote">"Decision software that reduces the dependence on 3D-print specialists" is one of four things the field needs now.
+    <span class="who">Jeppe Byskov, head of the industrial 3D-print centre at the Danish Technological Institute, ing.dk, April 2026, after EDA's AM Village (paraphrased from Danish)</span></div>
+  <div class="quote">The agency now buys "the right to 3D-print" spare parts instead of the parts, printed in "a mobile, container-based 3D factory".
+    <span class="who">Rune Bj&oslash;rlund Madsen, engineer at the Danish Defence Acquisition and Logistics Organisation, ing.dk, April 2026</span></div>
+  <div class="quote">Four acceptance levels for a field-printed part: permanent, temporary, emergency, scrap; decided from layer imagery, CT porosity, indentation tests and downskin roughness, with 99.9 percent density as the permanent gate.
+    <span class="who">The DISCMAM project (European Defence Fund), method described in Additive Manufacturing Media, July 2026</span></div>
+  <div class="quote">"Ensure that knowledge and technology from R&amp;D projects can be used in commercial services."
+    <span class="who">Danish Technological Institute, Project Developer for Industrial 3D Print in Defence R&amp;D, job advertisement, August 2026. This console was built for that application.</span></div>
+</div></section>
+
+<section id="act1"><div class="wrap">
+  <div class="sec-label">Act one &middot; Which parts</div>
+  <h2>Sixty-three parts, two scores, one verdict each</h2>
+  <p class="lede">Every part gets a <strong>technical score</strong> (does the process want this part: does it fit a machine, is there a
+  printable alloy, is the shape complex enough to gain, how much finishing will it need) and a <strong>business score</strong>
+  (does the fleet want it printed: lead time times criticality, supplier status, demand, unit cost). The weights are printed
+  next to each criterion so they can be argued with. <strong>Click any dot</strong> to read its scorecard, what single change of
+  fact would flip its verdict, and what to ask the supplier before paying for a print right.</p>
+  <div class="card">
+    <div class="chips" id="plat-ctl" style="margin-bottom:8px"></div>
+    <div class="viz" id="quad"><div class="tip"></div></div>
+    <div class="stat" id="quad-stat"></div>
+    <div id="scorecard" style="margin-top:18px"></div>
+    <div class="verdict sting"><b>What a sustainment desk reads here.</b> The catalogue is synthetic, the rules are public, and
+    the verdicts still fall the way real screenings fall: a small print list, a long investigate list, and a leave list of cheap,
+    quick or unprintable parts. The value of the exercise is the scorecard, not the dot: every verdict names the fact that
+    carries it, and the flip list says which fact to go and check first.</div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:2px">One part all the way &middot; what printing does to a design</div>
+    <h3>A hinge bracket, optimised for stiffness at 35 percent of the material, with and without the printer's rule</h3>
+    <p class="small" style="margin-top:6px">Take one bracket from the catalogue family (a wing-attachment hinge, clamped to a wall on the left,
+    carrying a downward load at the pin on the right) and ask an optimiser to place 35 percent of the material where it
+    stiffens the part most. Unconstrained, it draws the shape a machinist could never make. Then tell it the part will be
+    printed and that nothing may overhang more than 45 degrees over empty space in the build direction, and it redraws itself
+    for each way of standing the part on the plate. <strong>Pick a design.</strong> Each is computed here, by the classic
+    density method with Langelaar's printability filter, and each is scored for how much of it would need support in every
+    build direction.</p>
+    <div class="chips" id="topo-ctl" style="margin:10px 0"></div>
+    <div class="two">
+      <div><canvas class="topo" id="topo-canvas" width="120" height="60"></canvas><p class="note" id="topo-cap"></p></div>
+      <div><div class="tscroll"><table id="topo-table"></table></div><p class="note" id="topo-note"></p></div>
+    </div>
+    <div class="verdict"><b>The design consequence of printing.</b> <span id="topo-verdict"></span></div>
+  </div>
+</div></section>
+
+<section id="act2"><div class="wrap">
+  <div class="sec-label">Act two &middot; Is it worth it</div>
+  <h2>Printing never wins on unit price. Move the sliders and watch what it wins on.</h2>
+  <p class="lede">For every printable part: the cost to print one (machine hours, powder, support removal, machining of the
+  functional faces, heat treatment, a CT scan for critical parts, setup) against the conventional price; the days the fleet
+  would wait less; what a day of a stopped platform costs; how often the part is not on the shelf when it fails. Summed over
+  the fleet's remaining life and discounted, minus the one-off cost of qualifying the part family, that is what a
+  <strong>print right is worth</strong>. If it is worth less than nothing, buy the part.</p>
+  <div class="card">
+    <div class="ctl">
+      <label><div class="hint">A stopped platform costs, per day (criticality 1; criticality 2 counts 40 percent, 3 nothing)</div><input type="range" id="s-down" min="0" max="5000" step="100"><span class="val" id="v-down"></span></label>
+      <label><div class="hint">Chance the part is not on the shelf when it fails</div><input type="range" id="s-stock" min="0" max="1" step="0.05"><span class="val" id="v-stock"></span></label>
+      <label><div class="hint">Fleet size (the catalogue's demand is per hundred platforms)</div><input type="range" id="s-fleet" min="10" max="200" step="10"><span class="val" id="v-fleet"></span></label>
+      <label><div class="hint">Years of fleet life left</div><input type="range" id="s-years" min="2" max="15" step="1"><span class="val" id="v-years"></span></label>
+      <label><div class="hint">Machine hour rate, EUR (assumed)</div><input type="range" id="s-mach" min="40" max="200" step="10"><span class="val" id="v-mach"></span></label>
+      <label><div class="hint">Powder price against the assumed list (0.5 is half price)</div><input type="range" id="s-powder" min="0.5" max="2" step="0.1"><span class="val" id="v-powder"></span></label>
+    </div>
+    <div class="stat" id="eco-stat"></div>
+    <div class="tscroll" style="margin-top:14px"><table id="eco-table"></table></div>
+    <p class="note" id="eco-note"></p>
+    <div class="verdict sting"><b>The honesty line.</b> <span id="honesty"></span> What printing buys is days,
+    and days are worth money only for parts that stop a platform and are not on the shelf. A console that showed printing
+    winning on price would be lying to the desk that has to defend the budget. The last column combines both acts: a part
+    that act one left alone stays left alone however good its arithmetic looks here.</div>
+  </div>
+</div></section>
+
+<section id="act3"><div class="wrap">
+  <div class="sec-label">Act three &middot; What a container buys</div>
+  <h2>Readiness over ninety days, with and without a printer next to the fleet</h2>
+  <p class="lede">A simulation: every platform in the fleet can lose any of the printable critical parts at the catalogue's failure
+  rate. When a part fails and is not on the shelf, the platform is down until the part arrives: by the conventional route, or
+  printed in the container (one printer, its own powder stock, a queue), or, if the container is busy or out of powder, printed
+  at the home centre and shipped back. <strong>Set the fleet, the printers and the powder, then run it.</strong> The line is the
+  share of the fleet that is operational each day.</p>
+  <div class="card">
+    <div class="ctl">
+      <label><div class="hint">Platforms in the fleet</div><input type="range" id="r-fleet" min="10" max="200" step="10"><span class="val" id="rv-fleet"></span></label>
+      <label><div class="hint">Printers in the container</div><input type="range" id="r-print" min="1" max="3" step="1"><span class="val" id="rv-print"></span></label>
+      <label><div class="hint">Powder stock in the container, kg</div><input type="range" id="r-powder" min="10" max="200" step="10"><span class="val" id="rv-powder"></span></label>
+      <label><div class="hint">Random seed (a different draw of failures)</div><input type="range" id="r-seed" min="1" max="20" step="1"><span class="val" id="rv-seed"></span></label>
+    </div>
+    <div class="viz" id="ready-chart"><div class="tip"></div></div>
+    <div class="stat" id="ready-stat"></div>
+    <h3 style="margin-top:22px;font-size:17px">Where one container stops keeping up</h3>
+    <p class="small">The same simulation at the default settings, swept over fleet size. The gap between the container line and the
+    conventional line is what the container buys; where the lines meet, one printer's queue has become the new waiting list.</p>
+    <div class="viz" id="sweep-chart"><div class="tip"></div></div>
+    <p class="note" id="sweep-note"></p>
+    <div class="verdict"><b>What this says to a project developer.</b> <span id="ready-verdict"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:2px">The release decision &middot; which tier a printed part earns</div>
+    <h3>Move the measurements; the policy answers, and says who signs</h3>
+    <p class="small" style="margin-top:6px">DISCMAM's four tiers, written as an explicit rule set: the permanent gate is theirs
+    (99.9 percent density), the temporary and emergency floors and the signing rules are this console's illustrative policy.
+    The point is not the thresholds; it is that a non-specialist can read why a part landed where it did.</p>
+    <div class="ctl">
+      <label><div class="hint">Measured density, percent of solid</div><input type="range" id="t-dens" min="98.5" max="100" step="0.05"><span class="val" id="tv-dens"></span></label>
+      <label><div class="hint">Dimensional deviation, as a multiple of the tolerance</div><input type="range" id="t-dev" min="0" max="2.5" step="0.1"><span class="val" id="tv-dev"></span></label>
+    </div>
+    <div class="ctl">
+      <div><div class="hint">Witness coupons</div><div class="chips" id="t-wit"></div></div>
+      <div><div class="hint">Tolerance class of the part</div><div class="chips" id="t-tol"></div></div>
+      <div><div class="hint">Functional faces machined</div><div class="chips" id="t-mach"></div></div>
+      <div><div class="hint">Criticality</div><div class="chips" id="t-crit"></div></div>
+      <div><div class="hint">Situation</div><div class="chips" id="t-mis"></div></div>
+    </div>
+    <div class="tierbox"><div class="t" id="tier-out"></div><div id="tier-rule" style="margin-top:6px"></div><div class="hint" id="tier-sign" style="margin-top:6px"></div></div>
+    <div class="tscroll" style="margin-top:14px"><table id="tier-table"></table></div>
+  </div>
+</div></section>
+
+<section id="coda"><div class="wrap">
+  <div class="sec-label">Context, method, limits</div>
+  <h2>How this was built</h2>
+  <p class="small">The catalogue is generated from nineteen part families with a fixed random seed; the families are shaped on
+  the five DISCMAM use cases named in public (an air compressor cover, a fuel filter housing, a maintenance tool, a front
+  pulley, a joint-shaft flange) and on the items a vehicle, vessel or aircraft sustainment desk sees. No part is a real item
+  from any fleet. Machine envelopes, alloys and the density gate come from published sources; hour rates, powder prices,
+  build rates and qualification costs are assumptions and are marked as such in the table below. The decision model is one
+  JavaScript file that both this page and the build script run, so every number in the prose above was computed by the same
+  code that moves when you move a slider. The bracket is optimised in Python with the classic density method and Langelaar's
+  additive-manufacturing filter, with exact sensitivities through the filter.</p>
+  <div class="card"><div class="tscroll"><table id="assump-table"></table></div></div>
+  <div class="limits">
+    <h3 style="font-size:17px;margin-bottom:6px">Limits</h3>
+    <p>A synthetic catalogue proves the method, not any fleet's answer; the first real use is to load a real parts list.
+    Scores use attributes, not geometry: a real screening reads the CAD for wall thickness, trapped volumes and support
+    access. The cost model is a first-order one with assumed rates; DTI's own parameters are not public and are not used.
+    The bracket is a two-dimensional section under one load case, linear elastic, unqualified. The readiness simulation
+    treats failures as independent and ignores cannibalisation, partial stock and transport risk. The acceptance policy
+    is illustrative except for the one gate taken from DISCMAM. Nothing here is a certification claim.</p>
+  </div>
+  <p class="small" style="margin-top:14px">Sources: Danish Technological Institute, Center for Industrial 3D Print (facilities and
+  alloy list); Nikon SLM Solutions, SLM 280 build volume; DISCMAM project pages and the Additive Manufacturing Media article of
+  23 July 2026 on digital qualification of field-printed parts; ing.dk columns by Jeppe Byskov (April 2026) and the DALO
+  engineer interview (April 2026); Langelaar, Structural and Multidisciplinary Optimization 55 (2017), the additive
+  manufacturing filter; Sigmund's 99-line and the top88 formulation for the density method.</p>
+</div></section>
+
+<footer><div class="wrap"><span>Bolga&ccedil; G&uuml;len &middot; every number on this page is computed by the code in the repository</span><a href="https://github.com/bolgacg/right-to-print">github.com/bolgacg/right-to-print</a></div></footer>
+
+<div id="tour"><div class="wrap">
+  <div class="tk" id="tour-k"></div><div class="tx" id="tour-tx"></div>
+  <div class="nav"><button class="tbtn" id="tour-skip">Close</button><button class="tbtn primary" id="tour-next">Next</button></div>
+</div></div>
+
+<script>__MODEL__</script>
+<script>
+const D = __DATA__;
+const $ = s => document.querySelector(s);
+const fmt = (n,d) => n == null ? "" : Number(n).toLocaleString("en-GB",{maximumFractionDigits: d==null?1:d});
+const eur = n => (n<0?"-":"") + fmt(Math.abs(n),0) + " EUR";
+const parts = D.catalogue.parts, rules = D.rules, M = D.model;
+const byId = {}; parts.forEach(p=>byId[p.id]=p);
+const VCOL = {print:"var(--pos)", investigate:"var(--amber)", leave:"var(--faint)"};
+
+/* ---------- header numbers ---------- */
+$("#dek-n").textContent = parts.length;
+$("#dek-print").textContent = M.counts.print||0; $("#dek-inv").textContent = M.counts.investigate||0; $("#dek-leave").textContent = M.counts.leave||0;
+$("#dek-cheaper").textContent = M.cheaperPerUnit===0 ? "not one is cheaper to print than to buy" : `only ${M.cheaperPerUnit} are cheaper to print than to buy`;
+$("#honesty").textContent = `At the default settings ${M.cheaperPerUnit===0?"no part":M.cheaperPerUnit+" parts"} in this catalogue ${M.cheaperPerUnit===1?"is":"are"} cheaper to print than to buy; the printed unit costs ${fmt(M.ratioSpan[0],1)} to ${fmt(M.ratioSpan[2],1)} times the conventional one (median ${fmt(M.ratioSpan[1],1)}). Even at 40 EUR a machine hour and half-price powder, the cheapest setting the sliders allow, ${M.cheaperAtCheapest===0?"none is":M.cheaperAtCheapest+" are"}.`;
+
+/* ---------- domain figure ---------- */
+(function(){
+  const steps=[["supplier","holds the model and the data rights"],["print right","the licence to make the part","dec"],["screening","which parts, is it worth it","dec"],["printer","depot machine or container","dec"],["acceptance tier","permanent, temporary, emergency, scrap","dec"],["platform","back in service"]];
+  const W=960,H=150; let g=""; const n=steps.length, bw=(W-40)/n;
+  steps.forEach((s,i)=>{const x=20+i*bw; const dec=s[2]==="dec";
+    g+=`<rect x="${x+6}" y="34" width="${bw-12}" height="64" rx="5" fill="${dec?"#e9eef5":"var(--panel)"}" stroke="${dec?"var(--accent)":"var(--rule2)"}"/>`;
+    g+=`<text x="${x+bw/2}" y="60" text-anchor="middle" font-family="var(--serif)" font-size="15" font-weight="600" fill="var(--ink)">${s[0]}</text>`;
+    const words=s[1].split(" "); let line="",lines=[]; words.forEach(w=>{if((line+" "+w).length>26){lines.push(line);line=w}else line=(line?line+" ":"")+w}); lines.push(line);
+    lines.forEach((l,j)=>{g+=`<text x="${x+bw/2}" y="${78+j*13}" text-anchor="middle" font-family="var(--sans)" font-size="11" fill="var(--soft)">${l}</text>`});
+    if(i<n-1) g+=`<line x1="${x+bw-6}" y1="66" x2="${x+bw+6}" y2="66" stroke="var(--rule2)" stroke-width="2"/>`;});
+  g+=`<text x="20" y="128" font-family="var(--mono)" font-size="11" fill="var(--accent)">blue boxes: the four decisions this console makes</text>`;
+  $("#domain-fig").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="the path of a printed spare part">${g}</svg>`;
+})();
+
+/* ---------- generic charts ---------- */
+function line(el, series, opts){
+  el.querySelectorAll("svg,.legend").forEach(n=>n.remove());
+  const W=960,H=opts.h||280,P={l:52,r:12,t:12,b:30};
+  const xs=series.flatMap(s=>s.pts.map(p=>p.x)), ys=series.flatMap(s=>s.pts.map(p=>p.y));
+  const x0=opts.x0??Math.min(...xs), x1=Math.max(...xs), y0=opts.y0??0, y1=opts.y1??(Math.max(...ys)*1.06||1);
+  const X=x=>P.l+(x-x0)/((x1-x0)||1)*(W-P.l-P.r), Y=y=>P.t+(1-(y-y0)/((y1-y0)||1))*(H-P.t-P.b);
+  let g="";
+  for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4; g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${P.l-7}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${opts.yfmt?opts.yfmt(v):fmt(v,0)}</text>`}
+  for(let i=0;i<=4;i++){const v=x0+(x1-x0)*i/4; g+=`<text x="${X(v)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${opts.xlabel(v)}</text>`}
+  g+=series.map(s=>`<path d="${s.pts.map((p,i)=>(i?"L":"M")+X(p.x).toFixed(1)+" "+Y(p.y).toFixed(1)).join(" ")}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" ${s.dash?'stroke-dasharray="5 4"':''}/>`).join("");
+  el.insertAdjacentHTML("beforeend", `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.label}">${g}<line id="xh" x1="0" x2="0" y1="${P.t}" y2="${H-P.b}" stroke="var(--faint)" stroke-dasharray="3 3" style="display:none"/></svg><div class="legend">${series.map(s=>`<span><i style="border-top-color:${s.color}"></i>${s.name}</span>`).join("")}</div>`);
+  const svg=el.querySelector("svg"), tip=el.querySelector(".tip"), xh=svg.querySelector("#xh");
+  svg.addEventListener("mousemove", e=>{const r=svg.getBoundingClientRect(), mx=(e.clientX-r.left)/r.width*W; const xv=x0+(mx-P.l)/(W-P.l-P.r)*(x1-x0);
+    const near=series[0].pts.reduce((b,p)=>Math.abs(p.x-xv)<Math.abs(b.x-xv)?p:b, series[0].pts[0]);
+    const rows=series.map(s=>{let b=s.pts[0];for(const p of s.pts){if(Math.abs(p.x-xv)<Math.abs(b.x-xv))b=p}return s.name.split(",")[0]+" "+(opts.yfmt?opts.yfmt(b.y):fmt(b.y,1))});
+    xh.setAttribute("x1",X(near.x));xh.setAttribute("x2",X(near.x));xh.style.display="";tip.style.display="block";tip.style.left=Math.min(e.clientX-r.left+12,r.width-220)+"px";tip.style.top=(e.clientY-r.top-8)+"px";tip.textContent=opts.xlabel(near.x,true)+"  "+rows.join("  ")});
+  svg.addEventListener("mouseleave",()=>{tip.style.display="none";xh.style.display="none"});
+}
+
+/* ---------- act one: the quadrant ---------- */
+let selected = null, platFilter = "all";
+(function(){
+  const plats=["all",...new Set(parts.map(p=>p.platform))];
+  $("#plat-ctl").innerHTML=plats.map(p=>`<button class="chip" data-p="${p}" aria-pressed="${p===platFilter}">${p==="all"?"all platforms":p}</button>`).join("");
+  $("#plat-ctl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;platFilter=b.dataset.p;$("#plat-ctl").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));draw();});
+  function draw(){
+    const el=$("#quad"); el.querySelectorAll("svg,.legend").forEach(n=>n.remove());
+    const W=960,H=420,P={l:52,r:16,t:16,b:44};
+    const X=x=>P.l+x/100*(W-P.l-P.r), Y=y=>P.t+(1-y/100)*(H-P.t-P.b);
+    let g="";
+    for(let v=0;v<=100;v+=25){g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${P.l-7}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v}</text>`;
+      g+=`<text x="${X(v)}" y="${H-24}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v}</text>`}
+    g+=`<line x1="${X(M.thresholds.t)}" x2="${X(M.thresholds.t)}" y1="${P.t}" y2="${H-P.b}" stroke="var(--accent)" stroke-dasharray="4 3"/><line x1="${P.l}" x2="${W-P.r}" y1="${Y(M.thresholds.b)}" y2="${Y(M.thresholds.b)}" stroke="var(--accent)" stroke-dasharray="4 3"/>`;
+    g+=`<text x="${X(M.thresholds.t)+5}" y="${P.t+12}" font-size="10.5" fill="var(--accent)" font-family="var(--mono)">printable enough: ${M.thresholds.t}</text><text x="${W-P.r-4}" y="${Y(M.thresholds.b)-5}" text-anchor="end" font-size="10.5" fill="var(--accent)" font-family="var(--mono)">needed enough: ${M.thresholds.b}</text>`;
+    g+=`<text x="${(P.l+W-P.r)/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--soft)" font-family="var(--mono)">technical score: does the process want this part</text>`;
+    g+=`<text transform="translate(12 ${(P.t+H-P.b)/2}) rotate(-90)" text-anchor="middle" font-size="11" fill="var(--soft)" font-family="var(--mono)">business score: does the fleet want it printed</text>`;
+    const rows=M.screened.filter(s=>platFilter==="all"||byId[s.id].platform===platFilter);
+    rows.forEach(s=>{const sel=selected===s.id; g+=`<circle data-id="${s.id}" cx="${X(s.t.score)}" cy="${Y(s.b.score)}" r="${sel?9:6.5}" fill="${VCOL[s.v.label]}" fill-opacity="${sel?1:0.85}" stroke="${sel?"var(--ink)":"#fff"}" stroke-width="${sel?2:1}" style="cursor:pointer"><title>${byId[s.id].name}: ${s.v.label}</title></circle>`});
+    el.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="screening quadrant">${g}</svg><div class="legend"><span><i class="dot" style="background:var(--pos)"></i>print</span><span><i class="dot" style="background:var(--amber)"></i>investigate</span><span><i class="dot" style="background:var(--faint)"></i>leave</span><span>dashed lines: the two thresholds a part must clear</span></div>`);
+    el.querySelector("svg").addEventListener("click",e=>{const c=e.target.closest("circle");if(!c)return;selected=c.dataset.id;draw();card(selected);});
+    const c={print:0,investigate:0,leave:0}; rows.forEach(s=>c[s.v.label]++);
+    $("#quad-stat").innerHTML=[["parts shown",rows.length,platFilter==="all"?"the whole catalogue":platFilter],["print",c.print,"clear both thresholds"],["investigate",c.investigate,"clear one"],["leave",c.leave,"clear neither, or fail a gate"]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+  }
+  function card(id){
+    const s=M.screened.find(x=>x.id===id), p=byId[id];
+    const crit=[...s.t.crit.map(c=>({...c,side:"technical"})),...s.b.crit.map(c=>({...c,side:"business"}))];
+    $("#scorecard").innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline"><h3>${p.name}</h3><span class="pill acc">${p.platform}</span><span class="pill">${p.material}</span><span class="pill">${p.envelope_mm.join(" x ")} mm, ${p.mass_g} g</span><span class="pill ${s.v.label==="print"?"ok":s.v.label==="investigate"?"mid":"bad"}">${s.v.label}</span></div>
+      <p class="small" style="margin:8px 0 10px"><b>Verdict: ${s.v.label}.</b> ${s.v.why}${s.t.proc?"; process: "+s.t.proc:""}. Technical ${s.t.score}, business ${s.b.score}. Data rights: ${p.data_rights}.</p>
+      <div class="tscroll"><table><tr><th class="l">criterion</th><th class="l">the fact</th><th class="l">the rule</th><th>points</th><th>weight</th></tr>${crit.map(c=>`<tr><td class="l"><span class="pill">${c.side}</span> ${c.k}</td><td class="l">${c.fact}${c.note?`<div class="hint">${c.note}</div>`:""}</td><td class="l small">${c.rule}</td><td class="num">${c.w==="gate"?(c.pts?"pass":"FAIL"):fmt(c.pts,2)}</td><td class="num">${c.w==="gate"?"gate":c.w}</td></tr>`).join("")}</table></div>
+      <div class="two" style="margin-top:14px"><div><div class="sec-label" style="margin-bottom:4px">What would flip the verdict</div>${s.flip.length?s.flip.map(f=>`<p class="small">If the ${f.text}, this part would be <b>${f.to}</b>.</p>`).join(""):"<p class='small'>No single change of one fact moves it; the verdict is robust.</p>"}</div>
+      <div><div class="sec-label" style="margin-bottom:4px">Ask the supplier before paying for a print right</div>${s.questions.length?s.questions.map(q=>`<div class="q">${q}</div>`).join(""):"<p class='small'>Nothing special to ask; the data situation is clean.</p>"}</div></div>`;
+  }
+  draw();
+  // open with the fuel filter housing, one of the DISCMAM use-case shapes
+  const first=parts.find(p=>p.name==="fuel filter housing")||parts[0]; selected=first.id; draw(); card(first.id);
+})();
+
+/* ---------- one part all the way ---------- */
+(function(){
+  const T=D.topo; if(!T){$("#topo-cap").textContent="optimisation not yet run";return;}
+  let i=0;
+  $("#topo-ctl").innerHTML=T.designs.map((d,j)=>`<button class="chip" data-i="${j}" aria-pressed="${j===i}">${d.name}</button>`).join("");
+  $("#topo-ctl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;i=+b.dataset.i;$("#topo-ctl").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));draw();});
+  const ORI={"bottom-up":"printed bottom-up","left-to-right":"printed on its side","top-down":"printed top-down","right-to-left":"printed on its other side"};
+  function draw(){
+    const d=T.designs[i], cv=$("#topo-canvas"), ctx=cv.getContext("2d"), img=ctx.createImageData(120,60);
+    for(let y=0;y<60;y++)for(let x=0;x<120;x++){const v=d.field[y][x]; const k=(y*120+x)*4; const c=Math.round(255-v*225); img.data[k]=c;img.data[k+1]=c;img.data[k+2]=c+Math.round(v*10);img.data[k+3]=255}
+    ctx.putImageData(img,0,0);
+    // the pin and the wall
+    ctx.strokeStyle="#2c4a6b"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(108,30,7,0,Math.PI*2); ctx.stroke(); ctx.fillStyle="#2c4a6b"; ctx.fillRect(0,0,1.5,60);
+    const arrow=d.orientation==="none"?"":d.orientation==="bottom-up"?"build direction: up from the bottom edge":d.orientation==="left-to-right"?"build direction: from the wall outward":"build direction: down from the top edge";
+    $("#topo-cap").textContent=`${d.name}. Wall clamped on the left, load down at the pin (circle). 35 percent of a 120 by 60 mm plate. ${arrow}. ${d.iterations} iterations.`;
+    const free=T.designs[0];
+    $("#topo-table").innerHTML=`<tr><th class="l">measure</th><th>this design</th><th>unconstrained</th></tr>
+      <tr><td class="l">stiffness cost (compliance, lower is stiffer)</td><td class="num ${d.compliance_vs_free>=5?"neg":""}">${fmt(d.compliance,1)}${d.compliance_vs_free>=5?" (failed)":""}</td><td class="num">${fmt(free.compliance,1)}</td></tr>
+      <tr><td class="l">material used</td><td class="num">${fmt(100*d.volume,1)}%</td><td class="num">${fmt(100*free.volume,1)}%</td></tr>
+      ${Object.entries(d.unsupported).map(([o,v])=>`<tr><td class="l">would need support if ${ORI[o]}</td><td class="num ${v<0.02?"pos":v>0.15?"neg":"amb"}">${fmt(100*v,1)}% of the material</td><td class="num">${fmt(100*free.unsupported[o],1)}%</td></tr>`).join("")}</table>`;
+    $("#topo-note").textContent=`"Would need support" counts the solid cells with no solid cell among the three beneath them in that build direction, the 45-degree rule on a 1 mm grid. Mass saved against a solid plate of the same outline: ${fmt(T.mass_saved_vs_solid_pct,0)} percent, by construction of the 35 percent budget.`;
+    const ok=T.designs.slice(1).filter(x=>x.compliance_vs_free<5), failed=T.designs.slice(1).filter(x=>x.compliance_vs_free>=5);
+    const worst=ok.reduce((a,b)=>b.compliance_vs_free>a.compliance_vs_free?b:a, ok[0]);
+    $("#topo-verdict").textContent=`The unconstrained bracket would need support under ${fmt(100*Math.min(...Object.values(free.unsupported)),1)} to ${fmt(100*Math.max(...Object.values(free.unsupported)),1)} percent of its material depending on how it stands on the plate. Told the build direction, the optimiser redraws the part so that ${ok.map(x=>`${x.name} needs support under ${x.unsupported[x.orientation]<0.0005?"none of its material":fmt(100*x.unsupported[x.orientation],1)+" percent"} at a stiffness cost of ${fmt(100*(x.compliance_vs_free-1),0)} percent`).join("; ")}. ${failed.length?failed.map(x=>`For "${x.name}" the method did not find a usable design in ${x.iterations} iterations (${fmt(x.compliance_vs_free,0)} times the free compliance): a design that hangs the pin from the top edge exists, and the optimiser did not reach it; that is reported here as a failure, not hidden.`).join(" "):""} The orientation is a design decision, and it belongs in the screening before the print right is bought.`;
+  }
+  draw();
+})();
+
+/* ---------- act two: economics ---------- */
+const ECO = {downtimeEurDay:M.defaults.downtimeEurDay, pStockout:M.defaults.pStockout, fleet:M.defaults.fleet, fleetYears:M.defaults.fleetYears, container:true, machineEurH:rules.assumptions.machine_eur_h, powderFactor:1};
+(function(){
+  const bind=(id,key,vid,f)=>{const el=$(id); el.value=ECO[key]; const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{ECO[key]=+el.value;show();draw();});};
+  bind("#s-down","downtimeEurDay","#v-down",v=>fmt(v,0)+" EUR"); bind("#s-stock","pStockout","#v-stock",v=>Math.round(v*100)+"%"); bind("#s-fleet","fleet","#v-fleet",v=>v+" platforms");
+  bind("#s-years","fleetYears","#v-years",v=>v+" years"); bind("#s-mach","machineEurH","#v-mach",v=>v+" EUR/h"); bind("#s-powder","powderFactor","#v-powder",v=>"x"+v);
+  function draw(){
+    const rows=parts.map(p=>{const s=M.screened.find(x=>x.id===p.id), e=RTP.economics(p,rules,ECO); return {p,s,e,do:RTP.integrate(s.v.label,e)}});
+    const feas=rows.filter(r=>r.e.feasible);
+    const acts={"print":0,"buy the right":0,"investigate first":0,"buy the part":0,"leave":0}; feas.forEach(r=>acts[r.do]++);
+    const cheaper=feas.filter(r=>r.e.perEventCost>0).length;
+    const worth=feas.reduce((a,r)=>a+r.e.rightWorth,0);
+    const ratios=feas.map(r=>r.e.pc.unit/r.p.conv_cost_eur).sort((a,b)=>a-b);
+    $("#eco-stat").innerHTML=[["print now",acts.print,"act one said print; right held or open; value positive"],["buy the right",acts["buy the right"],"act one said print; value positive; supplier owns the data"],["investigate first",acts["investigate first"],"value positive but act one had doubts"],["buy the part",acts["buy the part"]+acts.leave,`worth less than nothing, or left alone in act one (${acts.leave})`],["cheaper per unit to print",cheaper+" of "+feas.length,`printed unit costs ${fmt(ratios[Math.floor(ratios.length*0.1)],1)} to ${fmt(ratios[Math.floor(ratios.length*0.9)],1)}x the conventional`],["all print rights, together",fmt(worth/1e6,2)+" m EUR","over the fleet life, after qualification"]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+    feas.sort((a,b)=>b.e.rightWorth-a.e.rightWorth);
+    $("#eco-table").innerHTML=`<tr><th class="l">part</th><th class="l">act one</th><th>print one</th><th>buy one</th><th>days saved</th><th>per year: cost</th><th>per year: downtime</th><th>right worth</th><th class="l">do</th></tr>`+
+      feas.slice(0,22).map(r=>`<tr><td class="l">${r.p.name}<div class="hint">${r.p.platform}, crit ${r.p.criticality}, ${r.p.obsolescence}</div></td><td class="l"><span class="pill ${r.s.v.label==="print"?"ok":r.s.v.label==="investigate"?"mid":"bad"}">${r.s.v.label}</span></td><td class="num">${eur(r.e.pc.unit)}</td><td class="num">${eur(r.p.conv_cost_eur)}</td><td class="num">${fmt(r.e.daysSaved,0)}</td><td class="num ${r.e.annualCost<0?"neg":"pos"}">${eur(r.e.annualCost)}</td><td class="num pos">${eur(r.e.annualDowntime)}</td><td class="num"><b>${eur(r.e.rightWorth)}</b></td><td class="l">${r.do}</td></tr>`).join("")+
+      `<tr><td class="l" colspan="9">${feas.length-22} more printable parts not shown; ${rows.length-feas.length} have no printable alloy.</td></tr>`;
+    $("#eco-note").textContent=`Right worth = present value over ${ECO.fleetYears} years at 4 percent of (events per year x (conventional price minus printed cost + stock-out chance x days saved x daily cost of a stopped platform)) minus the one-off qualification cost (${fmt(rules.assumptions.qualification_eur["1"],0)} EUR for criticality 1, ${fmt(rules.assumptions.qualification_eur["2"],0)} for 2, ${fmt(rules.assumptions.qualification_eur["3"],0)} for 3, assumed). Events per year scale with the fleet.`;
+  }
+  draw();
+})();
+
+/* ---------- act three: readiness ---------- */
+const RS = {fleet:M.defaults.fleet, printers:M.defaults.printers, powderKg:M.defaults.powderKg, pStockout:M.defaults.pStockout, days:M.defaults.days, seed:M.defaults.seed, reachbackDays:M.defaults.reachbackDays, downtimeEurDay:M.defaults.downtimeEurDay, fleetYears:M.defaults.fleetYears, container:true};
+(function(){
+  const bind=(id,key,vid,f)=>{const el=$(id); el.value=RS[key]; const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{RS[key]=+el.value;show();draw();});};
+  bind("#r-fleet","fleet","#rv-fleet",v=>v); bind("#r-print","printers","#rv-print",v=>v); bind("#r-powder","powderKg","#rv-powder",v=>v+" kg"); bind("#r-seed","seed","#rv-seed",v=>v);
+  const ecoRows=()=>parts.map(p=>({part:p, eco:RTP.economics(p,rules,Object.assign({},RS,{fleet:RS.fleet}))}));
+  function draw(){
+    const r=RTP.readiness(ecoRows(),rules,RS);
+    const pts=k=>r[k].series.map((v,i)=>({x:i,y:100*v}));
+    line($("#ready-chart"),[{name:"conventional supply only",color:"var(--faint)",pts:pts("conventional")},{name:"container on site",color:"var(--s1)",pts:pts("container")},{name:"container plus reachback to the home centre",color:"var(--s3)",pts:pts("container+reachback"),dash:true}],{label:"readiness over ninety days",xlabel:v=>"day "+Math.round(v),y0:Math.max(0,Math.floor((Math.min(...r.conventional.series)*100-5)/10)*10),y1:100,yfmt:v=>fmt(v,0)+"%",h:260});
+    const c=r.container, v=r.conventional, rb=r["container+reachback"];
+    $("#ready-stat").innerHTML=[["conventional",fmt(100*v.mean,1)+"%","mean readiness"],["container",fmt(100*c.mean,1)+"%",`${c.printed} parts printed, ${fmt(c.powderUsed,0)} kg powder, ${c.queueEnd} waiting at day 90`],["with reachback",fmt(100*rb.mean,1)+"%",`${rb.reach} parts sent home`],["platform-days bought",fmt((c.mean-v.mean)*RS.fleet*RS.days,0),`by the container over ${RS.days} days, fleet of ${RS.fleet}`]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+  }
+  draw();
+  // the sweep, precomputed at the defaults
+  const sw=M.sweep;
+  line($("#sweep-chart"),[{name:"conventional supply only",color:"var(--faint)",pts:sw.map(s=>({x:s.fleet,y:100*s.conventional}))},{name:"one container on site",color:"var(--s1)",pts:sw.map(s=>({x:s.fleet,y:100*s.container}))},{name:"container plus reachback",color:"var(--s3)",pts:sw.map(s=>({x:s.fleet,y:100*s.reachback})),dash:true}],{label:"readiness by fleet size",xlabel:v=>fmt(v,0)+" platforms",x0:0,y0:60,y1:100,yfmt:v=>fmt(v,0)+"%",h:240});
+  const gap=sw.map(s=>({f:s.fleet,g:s.container-s.conventional})); const best=gap.reduce((a,b)=>b.g>a.g?b:a);
+  $("#sweep-note").textContent=`Defaults: one printer, ${M.defaults.powderKg} kg of powder, ${Math.round(100*M.defaults.pStockout)} percent stock-out chance, seed ${M.defaults.seed}. Averaged over ${M.sweepSeeds} random draws. The container's gain peaks at a fleet of ${best.f} (${fmt(100*best.g,1)} readiness points) and ${M.breakAt?`falls to under two points at ${M.breakAt} platforms`:`stays above two points all the way to ${sw[sw.length-1].fleet} platforms`}; the queue at day 90 grows from ${sw[0].queueEnd} to ${sw[sw.length-1].queueEnd} parts. Where the container line drops while the reachback line holds, the container ran out of powder or printer hours and the home centre carried the rest.`;
+  $("#ready-verdict").textContent=`The container is not a printer; it is a queue with a powder budget. Its value is a curve over fleet size with a peak, and the reachback line shows that the home centre remains the capacity the container borrows from. The questions to put in a project proposal are the ones this simulation is parameterised by: failure rates of the printable list, powder logistics, and who prints what the container cannot.`;
+})();
+
+/* ---------- acceptance tier ---------- */
+const TI={density:99.93,deviation:0.8,witness:"pass",tolerance:"fine",machined:true,criticality:1,mission:"routine"};
+(function(){
+  const bind=(id,key,vid,f)=>{const el=$(id); el.value=TI[key]; const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{TI[key]=+el.value;show();draw();});};
+  bind("#t-dens","density","#tv-dens",v=>fmt(v,2)+"%"); bind("#t-dev","deviation","#tv-dev",v=>"x"+fmt(v,1));
+  const chips=(id,key,opts,val)=>{const el=$(id); el.innerHTML=opts.map(o=>`<button class="chip" data-v="${o[0]}" aria-pressed="${String(o[0])===String(TI[key])}">${o[1]}</button>`).join(""); el.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;TI[key]=val?val(b.dataset.v):b.dataset.v;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));draw();});};
+  chips("#t-wit","witness",[["pass","passed"],["none","none printed"],["fail","failed"]]); chips("#t-tol","tolerance",[["coarse","coarse"],["medium","medium"],["fine","fine"]]);
+  chips("#t-mach","machined",[["true","yes"],["false","no"]],v=>v==="true"); chips("#t-crit","criticality",[["1","1, stops it"],["2","2, degrades"],["3","3, cosmetic"]],v=>+v); chips("#t-mis","mission",[["routine","routine"],["emergency","emergency, no other route"]]);
+  function draw(){const o=RTP.tier(TI,rules); $("#tier-out").className="t "+o.tier; $("#tier-out").textContent=o.tier; $("#tier-rule").textContent="Because: "+o.rule+"."; $("#tier-sign").textContent="Who signs: "+o.signs+".";}
+  draw();
+  $("#tier-table").innerHTML=`<tr><th class="l">four builds, same policy</th><th>density</th><th>deviation</th><th class="l">witness</th><th class="l">situation</th><th class="l">tier</th><th class="l">signs</th></tr>`+M.tierExamples.map(t=>`<tr><td class="l">${t.name}</td><td class="num">${t.inp.density}%</td><td class="num">x${t.inp.deviation}</td><td class="l">${t.inp.witness}</td><td class="l">${t.inp.mission}, crit ${t.inp.criticality}</td><td class="l"><b class="${t.out.tier==="permanent"?"pos":t.out.tier==="scrap"?"":"amb"}">${t.out.tier}</b></td><td class="l small">${t.out.signs}</td></tr>`).join("");
+})();
+
+/* ---------- assumptions table ---------- */
+(function(){
+  const a=rules.assumptions, rows=[];
+  Object.entries(rules.processes).forEach(([k,p])=>rows.push([p.label,"envelope "+p.envelope_mm.join(" x ")+" mm",p.kind,p.source]));
+  Object.entries(rules.alloys).forEach(([k,al])=>rows.push([k+" to "+(al.am||"nothing listed"),al.am?`powder ${al.powder_eur_kg} EUR/kg, ${al.deposition_cm3_h} cm3/h (assumed)`:"","fact (alloy)",al.source]));
+  rows.push(["density gate for permanent use",rules.gates.density_permanent_pct+"%","fact",rules.gates.density_permanent_source]);
+  rows.push(["temporary and emergency floors",rules.gates.density_temporary_pct+"% and "+rules.gates.density_emergency_pct+"%","assumption",rules.gates.tier_note]);
+  rows.push(["machine hour, labour hour",a.machine_eur_h+" and "+a.labour_eur_h+" EUR","assumption","editable in act two"]);
+  rows.push(["heat treatment, CT scan, setup",a.heat_treatment_eur+" EUR, "+a.ct_scan_eur+" EUR, 1.5 h","assumption",""]);
+  rows.push(["layer, recoat, support fraction",a.layer_um+" um, "+a.recoat_s+" s, "+Math.round(100*a.support_fraction)+"%","assumption",""]);
+  rows.push(["qualification per part family",Object.entries(a.qualification_eur).map(([k,v])=>"crit "+k+": "+fmt(v,0)).join(", ")+" EUR","assumption",a.qualification_note]);
+  rows.push(["verdict thresholds","technical "+M.thresholds.t+", business "+M.thresholds.b,"this console's",rules.weights.note]);
+  $("#assump-table").innerHTML=`<tr><th class="l">item</th><th class="l">value</th><th class="l">kind</th><th class="l">source or note</th></tr>`+rows.map(r=>`<tr><td class="l">${r[0]}</td><td class="l num" style="font-size:12.5px">${r[1]}</td><td class="l"><span class="pill ${r[2].startsWith("fact")?"ok":"mid"}">${r[2]}</span></td><td class="l small">${r[3]}</td></tr>`).join("");
+})();
+
+/* ---------- walkthrough ---------- */
+const TOUR=[
+ ["Start here","This console answers four questions a sustainment desk asks about printing spare parts. <b>Read the first paragraph:</b> most parts should not be printed, and printing never wins on price here."],
+ ["Five things to know","If metal printing, print rights or acceptance tiers are new to you, the five numbered statements and the drawn path are enough to read everything that follows."],
+ ["Their words","The people who own this problem, in their own sentences: the centre director, the procurement agency, the DISCMAM project, and the job advertisement this was built for."],
+ ["Act one","<b>Click a dot.</b> Every part has a technical score and a business score; the dashed lines are the thresholds. The scorecard shows the fact behind every point, what would flip the verdict, and what to ask the supplier."],
+ ["One part all the way","<b>Pick a design.</b> A hinge bracket optimised for stiffness, then re-optimised knowing it will be printed in a given direction. The table counts how much of each design would need support."],
+ ["Act two","<b>Move the sliders.</b> The cost to print against the cost to buy, the days saved, and what a print right is worth over the fleet's life. Watch the honesty line: nothing gets cheaper to print."],
+ ["Act three","<b>Set the fleet, printers and powder.</b> A ninety-day simulation of readiness with and without a container; then the sweep that shows where one container stops keeping up, and the release decision with its four tiers."],
+ ["Then","Method, the assumptions table with a fact-or-assumption pill on every row, and the limits, which are real."]
+];
+const ANCH=["header","#primer","#words","#act1","#topo-ctl","#act2","#act3","#coda"];
+const tour={i:0,open(i){this.i=i;$("#tour").classList.add("on");this.render(true)},close(){$("#tour").classList.remove("on");try{localStorage.setItem("rtp-tour","seen")}catch(e){}},
+  render(sc){const [k,t]=TOUR[this.i];$("#tour-k").textContent=`${this.i+1} of ${TOUR.length} · ${k}`;$("#tour-tx").innerHTML=t;$("#tour-next").textContent=this.i===TOUR.length-1?"Done":"Next";
+    if(sc){const el=document.querySelector(ANCH[this.i]); if(el) window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-16),behavior:"smooth"});}},
+  next(){if(this.i>=TOUR.length-1){this.close();return} this.i++;this.render(true)}};
+$("#tour-next").addEventListener("click",()=>tour.next());$("#tour-skip").addEventListener("click",()=>tour.close());$("#tourbtn").addEventListener("click",()=>tour.open(0));
+if(!location.search.includes("tour=off")){try{if(localStorage.getItem("rtp-tour")!=="seen")setTimeout(()=>tour.open(0),600)}catch(e){setTimeout(()=>tour.open(0),600)}}
+</script>
+</body>
+</html>

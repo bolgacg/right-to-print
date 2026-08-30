@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+data/topo.log
+data/topo_topdown.log
+data/topo_topdown.json
