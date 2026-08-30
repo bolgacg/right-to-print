@@ -58,6 +58,8 @@ data = {
     "rules": json.load(open("data/rules.json")),
     "model": model,
     "topo": json.load(open("data/topo.json")) if os.path.exists("data/topo.json") else None,
+    "topo_retry": ({"orientation": "top-down", **{k: v for k, v in json.load(open("data/topo_topdown.json")).items() if k in ("compliance", "iterations")}}
+                   if os.path.exists("data/topo_topdown.json") else None),
 }
 json.dump(data, open("docs/data.json", "w"))
 m = model
