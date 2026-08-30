@@ -20,7 +20,7 @@ __CSS__
   plate and it springs. In 2018 the US standards institute printed a small bridge, cut its legs free and measured the
   spring: <strong id="dek-meas"></strong> at the far end. It then asked the world's modellers to predict that number blind.
   <strong>None of them met the criteria.</strong> This chapter does not claim to; it calibrates one scalar to that
-  measurement, and then does the two things a centre can honestly do with such a model: read the shape of the springback
+  measurement, and then does the two things a centre can do with such a model: read the shape of the springback
   along the part and the legs that carry it, and pre-deform the design so the printed part comes out flat, which works
   exactly in the model and only as well as the model in the machine.</p>
   <div class="byline"><span>Bolga&ccedil; G&uuml;len &middot; Odense, 2026</span><span>&middot;</span><a href="https://github.com/bolgacg/right-to-print">source and data</a>
@@ -42,8 +42,7 @@ __CSS__
     given the shrinkage it is left with once it has cooled and yielded, and the part is built up layer by layer with that
     shrinkage fighting the structure below. One number, the inherent strain, carries all the thermal detail.</p>
     <p><strong>Compensation</strong> means printing the mirror image of the predicted springback so that design plus spring
-    equals the drawing. It is only as right as the model that predicted the spring, and that is the whole point of the
-    last act.</p>
+    equals the drawing. It is only as right as the model that predicted the spring, and that is what the last act measures.</p>
   </div>
   <div class="card" style="margin-top:20px">
     <div class="sec-label" style="margin-bottom:2px">The domain, drawn from the benchmark's own geometry file</div>
@@ -99,7 +98,7 @@ __CSS__
     <div class="ctl"><label><div class="hint">The real inherent strain relative to the calibrated one (the blind submissions in 2018 missed by about this much either way)</div><input type="range" id="err" min="-40" max="40" step="5" value="20"><span class="val" id="err-val"></span></label></div>
     <div class="viz" id="comp-chart"><div class="tip"></div></div>
     <div class="stat" id="comp-stat"></div>
-    <div class="verdict sting"><b>The honest sentence about compensation.</b> <span id="comp-verdict"></span></div>
+    <div class="verdict sting"><b>What compensation buys when the model is wrong.</b> <span id="comp-verdict"></span></div>
   </div>
 </div></section>
 
@@ -119,10 +118,7 @@ __CSS__
 
 <footer><div class="wrap"><span>Bolga&ccedil; G&uuml;len &middot; every number on this page is computed by distort/simulate.py from the benchmark geometry</span><a href="../">back to the console</a></div></footer>
 
-<div id="tour"><div class="wrap">
-  <div class="tk" id="tour-k"></div><div class="tx" id="tour-tx"></div>
-  <div class="nav"><button class="tbtn" id="tour-skip">Close</button><button class="tbtn primary" id="tour-next">Next</button></div>
-</div></div>
+<div id="tour"><div class="tour-hl" id="tour-hl"></div><div class="tour-card" id="tour-card"></div></div>
 
 <script>
 const D = __DATA__;
@@ -190,7 +186,7 @@ $("#n-layers").textContent = D.mesh.nz; $("#h-layer").textContent = D.mesh.h_mm;
     cont.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="compensation">${g}</svg><div class="legend"><span><i style="border-top-color:var(--s2);border-top-style:dashed"></i>pre-deformed design (the mirror of the predicted spring)</span><span><i style="border-top-color:var(--rule2);border-top-style:dashed"></i>predicted spring</span><span><i style="border-top-color:var(--s1)"></i>what comes out if the real e* is ${e>=0?"+":""}${e} percent off</span></div>`);
     const mx = Math.max(...resid.map(Math.abs));
     $("#comp-stat").innerHTML=[["largest residual",fmt(mx*1000,0)+" um",`with the model ${e>=0?"+":""}${e} percent off`],["uncorrected",fmt(Math.max(...R.map(Math.abs))*1000,0)+" um","the spring left alone"],["gain",fmt(Math.max(...R.map(Math.abs))/Math.max(mx,1e-9),1)+"x","flatter than uncorrected"]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
-    $("#comp-verdict").textContent=`With the model ${e>=0?"+":""}${e} percent off, the compensated part still comes out ${fmt(mx*1000,0)} micrometres from flat at its worst ridge, against ${fmt(Math.max(...R.map(Math.abs))*1000,0)} uncorrected. The residual is exactly the model error times the spring: compensation does not remove the need for a good model, it multiplies the model's error by a smaller number. In 2018 the blind models missed this bridge by roughly that much either way; the honest offer to a partner is one calibration print per part family, and this arithmetic for what it buys.`;
+    $("#comp-verdict").textContent=`With the model ${e>=0?"+":""}${e} percent off, the compensated part still comes out ${fmt(mx*1000,0)} micrometres from flat at its worst ridge, against ${fmt(Math.max(...R.map(Math.abs))*1000,0)} uncorrected. The residual is exactly the model error times the spring: compensation does not remove the need for a good model, it multiplies the model's error by a smaller number. In 2018 the blind models missed this bridge by roughly that much either way; the realistic offer to a partner is one calibration print per part family, and this arithmetic for what it buys.`;
   }
   el.addEventListener("input", draw); draw();
 })();
@@ -206,12 +202,37 @@ const TOUR=[
  ["Then","Method, sources, limits: one calibrated scalar, two dimensions, no plasticity."]
 ];
 const ANCH=["header","#primer","#act1","#act2","#coda"];
-const tour={i:0,open(i){this.i=i;$("#tour").classList.add("on");this.render(true)},close(){$("#tour").classList.remove("on");try{localStorage.setItem("rtp-d-tour","seen")}catch(e){}},
-  render(sc){const [k,t]=TOUR[this.i];$("#tour-k").textContent=`${this.i+1} of ${TOUR.length} · ${k}`;$("#tour-tx").innerHTML=t;$("#tour-next").textContent=this.i===TOUR.length-1?"Done":"Next";
-    if(sc){const el=document.querySelector(ANCH[this.i]); if(el) window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-16),behavior:"smooth"});}},
-  next(){if(this.i>=TOUR.length-1){this.close();return} this.i++;this.render(true)}};
-$("#tour-next").addEventListener("click",()=>tour.next());$("#tour-skip").addEventListener("click",()=>tour.close());$("#tourbtn").addEventListener("click",()=>tour.open(0));
-if(!location.search.includes("tour=off")){try{if(localStorage.getItem("rtp-d-tour")!=="seen")setTimeout(()=>tour.open(0),600)}catch(e){setTimeout(()=>tour.open(0),600)}}
+const TOURKEY="rtp-d-tour-v2";
+const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length}`, html:t[1]}));
+(function(){
+  const root=$('#tour'), hl=$('#tour-hl'), card=$('#tour-card'); let idx=0;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function place(){
+    const st=STEPS[idx]; const elm=document.querySelector(st.sel); if(!elm){next();return;}
+    elm.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+    setTimeout(()=>{
+      const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
+      root.style.height=document.documentElement.scrollHeight+'px';
+      const hh=Math.min(r.height, innerHeight-80);
+      hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
+      const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
+      card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
+      const cw=Math.min(400, innerWidth-32); let cx=r.left+sx+r.width+18, cy=r.top+sy;
+      if(cx+cw>sx+innerWidth-16){
+        if(r.top+hh+16+250<innerHeight){ cx=Math.max(16+sx, r.left+sx); cy=r.top+sy+hh+16; }
+        else { cx=sx+innerWidth-16-cw; cy=sy+innerHeight-270; }
+      }
+      card.style.left=cx+'px'; card.style.top=Math.max(sy+16,cy)+'px';
+      $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
+    }, reduced?50:450);
+  }
+  function next(){ if(idx>=STEPS.length-1){stop();return;} idx++; place(); }
+  function stop(){ root.classList.remove('on'); try{localStorage.setItem(TOURKEY,'seen')}catch(e){} }
+  function start(){ idx=0; root.classList.add('on'); place(); }
+  $('#tourbtn').addEventListener('click', start);
+  window.addEventListener('resize', ()=>{ if(root.classList.contains('on')) place(); });
+  if(!location.search.includes("tour=off")){try{if(localStorage.getItem(TOURKEY)!=="seen")setTimeout(start,700)}catch(e){setTimeout(start,700)}}
+})();
 </script>
 </body>
 </html>

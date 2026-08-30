@@ -82,16 +82,21 @@ canvas.topo{width:100%;image-rendering:pixelated;border:1px solid var(--rule);bo
 .tierbox .t.permanent{color:var(--pos)}.tierbox .t.temporary{color:var(--amber)}.tierbox .t.emergency{color:var(--neg)}.tierbox .t.scrap{color:var(--soft)}
 footer{border-top:1px solid var(--rule);margin-top:44px;padding:20px 0 30px;font-family:var(--mono);font-size:12px;color:var(--faint)}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-#tour{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-top:1px solid var(--rule2);box-shadow:0 -8px 30px rgba(0,0,0,.10);transform:translateY(110%);transition:transform .3s}
-#tour.on{transform:none}
-#tour .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 20px}
-@media(max-width:620px){#tour .wrap{grid-template-columns:1fr auto}#tour .tk{display:none}}
-#tour .tk{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
-#tour .tx{font-size:14px;line-height:1.45}#tour .tx b{font-weight:600}
-#tour .nav{display:flex;gap:6px;align-items:center}
-.tbtn{font-family:var(--mono);font-size:12px;padding:8px 13px;border-radius:4px;border:1px solid var(--rule2);background:var(--card);color:var(--soft);cursor:pointer}
-.tbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+/* guided tour: spotlight, card beside the element */
+#tour{position:absolute;top:0;left:0;right:0;z-index:50;display:none}
+#tour.on{display:block}
+.tour-hl{position:absolute;border:2px solid var(--accent);border-radius:8px;box-shadow:0 0 0 9999px rgba(26,29,33,.55);transition:all .35s ease;pointer-events:none}
+.tour-card{position:absolute;width:min(400px,calc(100vw - 32px));background:var(--card);border:1px solid var(--rule2);border-radius:8px;padding:18px 20px;box-shadow:0 6px 30px rgba(0,0,0,.18)}
+.tour-card .tk{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.tour-card p{font-size:14px;line-height:1.55;color:var(--ink);margin:0 0 12px}
+.tour-nav{display:flex;align-items:center;gap:8px}
+.tour-nav .dots{flex:1;display:flex;gap:5px}
+.tour-nav .dots i{width:6px;height:6px;border-radius:50%;background:var(--rule2)}
+.tour-nav .dots i.on{background:var(--accent)}
+.tour-btn{font-family:var(--mono);font-size:12px;padding:7px 14px;border-radius:4px;border:1px solid var(--rule2);background:var(--card);color:var(--soft);cursor:pointer}
+.tour-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .tour-open{font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:4px;border:1px solid var(--accent);background:var(--card);color:var(--accent);cursor:pointer}
+.tour-open:hover{background:var(--accent);color:#fff}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -172,7 +177,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
     <div class="viz" id="quad"><div class="tip"></div></div>
     <div class="stat" id="quad-stat"></div>
     <div id="scorecard" style="margin-top:18px"></div>
-    <div class="verdict sting"><b>What a sustainment desk reads here.</b> The catalogue is synthetic, the rules are public, and
+    <div class="verdict sting"><b>What the screening shows.</b> The catalogue is synthetic, the rules are public, and
     the verdicts still fall the way real screenings fall: a small print list, a long investigate list, and a leave list of cheap,
     quick or unprintable parts. The value of the exercise is the scorecard, not the dot: every verdict names the fact that
     carries it, and the flip list says which fact to go and check first.</div>
@@ -193,7 +198,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
       <div><canvas class="topo" id="topo-canvas" width="120" height="60"></canvas><p class="note" id="topo-cap"></p></div>
       <div><div class="tscroll"><table id="topo-table"></table></div><p class="note" id="topo-note"></p></div>
     </div>
-    <div class="verdict"><b>The design consequence of printing.</b> <span id="topo-verdict"></span></div>
+    <div class="verdict"><b>What the printer's rule does to the design.</b> <span id="topo-verdict"></span></div>
     <p class="note" style="margin-top:12px">Whether the printed part comes out the shape it was drawn is the other half of the design consequence. <a href="distort/">Chapter three</a> calibrates a distortion model to NIST's AM-Bench bridge and shows what compensation buys, and what a model error costs.</p>
   </div>
 </div></section>
@@ -218,9 +223,9 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
     <div class="stat" id="eco-stat"></div>
     <div class="tscroll" style="margin-top:14px"><table id="eco-table"></table></div>
     <p class="note" id="eco-note"></p>
-    <div class="verdict sting"><b>The honesty line.</b> <span id="honesty"></span> What printing buys is days,
+    <div class="verdict sting"><b>Printing does not win on price in this catalogue.</b> <span id="honesty"></span> What printing buys is days,
     and days are worth money only for parts that stop a platform and are not on the shelf. A console that showed printing
-    winning on price would be lying to the desk that has to defend the budget. The last column combines both acts: a part
+    winning on price would mislead the desk that has to defend the budget. The last column combines both acts: a part
     that act one left alone stays left alone however good its arithmetic looks here.</div>
   </div>
 </div></section>
@@ -303,10 +308,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 
 <footer><div class="wrap"><span>Bolga&ccedil; G&uuml;len &middot; every number on this page is computed by the code in the repository</span><a href="https://github.com/bolgacg/right-to-print">github.com/bolgacg/right-to-print</a></div></footer>
 
-<div id="tour"><div class="wrap">
-  <div class="tk" id="tour-k"></div><div class="tx" id="tour-tx"></div>
-  <div class="nav"><button class="tbtn" id="tour-skip">Close</button><button class="tbtn primary" id="tour-next">Next</button></div>
-</div></div>
+<div id="tour"><div class="tour-hl" id="tour-hl"></div><div class="tour-card" id="tour-card"></div></div>
 
 <script>/* The decision model behind "The right to print". Pure functions, no DOM,
    loaded by the page and by build_data.py (through node) so the numbers in
@@ -743,7 +745,7 @@ const RS = {fleet:M.defaults.fleet, printers:M.defaults.printers, powderKg:M.def
   line($("#sweep-chart"),[{name:"conventional supply only",color:"var(--faint)",pts:sw.map(s=>({x:s.fleet,y:100*s.conventional}))},{name:"one container on site",color:"var(--s1)",pts:sw.map(s=>({x:s.fleet,y:100*s.container}))},{name:"container plus reachback",color:"var(--s3)",pts:sw.map(s=>({x:s.fleet,y:100*s.reachback})),dash:true}],{label:"readiness by fleet size",xlabel:v=>fmt(v,0)+" platforms",x0:0,y0:60,y1:100,yfmt:v=>fmt(v,0)+"%",h:240});
   const gap=sw.map(s=>({f:s.fleet,g:s.container-s.conventional})); const best=gap.reduce((a,b)=>b.g>a.g?b:a);
   $("#sweep-note").textContent=`Defaults: one printer, ${M.defaults.powderKg} kg of powder, ${Math.round(100*M.defaults.pStockout)} percent stock-out chance, seed ${M.defaults.seed}. Averaged over ${M.sweepSeeds} random draws. The container's gain peaks at a fleet of ${best.f} (${fmt(100*best.g,1)} readiness points) and ${M.breakAt?`falls to under two points at ${M.breakAt} platforms`:`stays above two points all the way to ${sw[sw.length-1].fleet} platforms`}; the queue at day 90 grows from ${sw[0].queueEnd} to ${sw[sw.length-1].queueEnd} parts. Where the container line drops while the reachback line holds, the container ran out of powder or printer hours and the home centre carried the rest.`;
-  $("#ready-verdict").textContent=`The container is not a printer; it is a queue with a powder budget. Its value is a curve over fleet size with a peak, and the reachback line shows that the home centre remains the capacity the container borrows from. The questions to put in a project proposal are the ones this simulation is parameterised by: failure rates of the printable list, powder logistics, and who prints what the container cannot.`;
+  $("#ready-verdict").textContent=`A container is a queue and a powder budget, and its value is a curve over fleet size with a peak; the reachback line shows that the home centre remains the capacity the container borrows from. The questions to put in a project proposal are the ones this simulation is parameterised by: failure rates of the printable list, powder logistics, and who prints what the container cannot.`;
 })();
 
 /* ---------- acceptance tier ---------- */
@@ -781,17 +783,42 @@ const TOUR=[
  ["Their words","The people who own this problem, in their own sentences: the centre director, the procurement agency, the DISCMAM project, and the job advertisement this was built for."],
  ["Act one","<b>Click a dot.</b> Every part has a technical score and a business score; the dashed lines are the thresholds. The scorecard shows the fact behind every point, what would flip the verdict, and what to ask the supplier."],
  ["One part all the way","<b>Pick a design.</b> A hinge bracket optimised for stiffness, then re-optimised knowing it will be printed in a given direction. The table counts how much of each design would need support."],
- ["Act two","<b>Move the sliders.</b> The cost to print against the cost to buy, the days saved, and what a print right is worth over the fleet's life. Watch the honesty line: nothing gets cheaper to print."],
+ ["Act two","<b>Move the sliders.</b> The cost to print against the cost to buy, the days saved, and what a print right is worth over the fleet's life. Read the verdict: nothing gets cheaper to print."],
  ["Act three","<b>Set the fleet, printers and powder.</b> A ninety-day simulation of readiness with and without a container; then the sweep that shows where one container stops keeping up, and the release decision with its four tiers."],
  ["Then","Method, the assumptions table with a fact-or-assumption pill on every row, and the limits, which are real."]
 ];
 const ANCH=["header","#primer","#words","#act1","#topo-ctl","#act2","#act3","#coda"];
-const tour={i:0,open(i){this.i=i;$("#tour").classList.add("on");this.render(true)},close(){$("#tour").classList.remove("on");try{localStorage.setItem("rtp-tour","seen")}catch(e){}},
-  render(sc){const [k,t]=TOUR[this.i];$("#tour-k").textContent=`${this.i+1} of ${TOUR.length} · ${k}`;$("#tour-tx").innerHTML=t;$("#tour-next").textContent=this.i===TOUR.length-1?"Done":"Next";
-    if(sc){const el=document.querySelector(ANCH[this.i]); if(el) window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-16),behavior:"smooth"});}},
-  next(){if(this.i>=TOUR.length-1){this.close();return} this.i++;this.render(true)}};
-$("#tour-next").addEventListener("click",()=>tour.next());$("#tour-skip").addEventListener("click",()=>tour.close());$("#tourbtn").addEventListener("click",()=>tour.open(0));
-if(!location.search.includes("tour=off")){try{if(localStorage.getItem("rtp-tour")!=="seen")setTimeout(()=>tour.open(0),600)}catch(e){setTimeout(()=>tour.open(0),600)}}
+const TOURKEY="rtp-tour-v2";
+const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length}`, html:t[1]}));
+(function(){
+  const root=$('#tour'), hl=$('#tour-hl'), card=$('#tour-card'); let idx=0;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function place(){
+    const st=STEPS[idx]; const elm=document.querySelector(st.sel); if(!elm){next();return;}
+    elm.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+    setTimeout(()=>{
+      const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
+      root.style.height=document.documentElement.scrollHeight+'px';
+      const hh=Math.min(r.height, innerHeight-80);
+      hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
+      const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
+      card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
+      const cw=Math.min(400, innerWidth-32); let cx=r.left+sx+r.width+18, cy=r.top+sy;
+      if(cx+cw>sx+innerWidth-16){
+        if(r.top+hh+16+250<innerHeight){ cx=Math.max(16+sx, r.left+sx); cy=r.top+sy+hh+16; }
+        else { cx=sx+innerWidth-16-cw; cy=sy+innerHeight-270; }
+      }
+      card.style.left=cx+'px'; card.style.top=Math.max(sy+16,cy)+'px';
+      $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
+    }, reduced?50:450);
+  }
+  function next(){ if(idx>=STEPS.length-1){stop();return;} idx++; place(); }
+  function stop(){ root.classList.remove('on'); try{localStorage.setItem(TOURKEY,'seen')}catch(e){} }
+  function start(){ idx=0; root.classList.add('on'); place(); }
+  $('#tourbtn').addEventListener('click', start);
+  window.addEventListener('resize', ()=>{ if(root.classList.contains('on')) place(); });
+  if(!location.search.includes("tour=off")){try{if(localStorage.getItem(TOURKEY)!=="seen")setTimeout(start,700)}catch(e){setTimeout(start,700)}}
+})();
 </script>
 </body>
 </html>

@@ -22,11 +22,10 @@ __CSS__
   <p class="dek">The console's <a href="../">release decision</a> took the measurements as given. This chapter asks where
   they come from. A layer camera watches every layer of a metal print; a witness coupon is pulled apart after the
   build; a CT scan counts the pores. Each is evidence of a different strength, and a release policy that does not
-  know their strengths is a hope. Three measured answers: a layer camera on an EOS M290 catches <span id="dek-pb"></span>, at <span id="dek-pbfc"></span> false alarms per
+  know their strengths is guessing. Three measured answers: a layer camera on an EOS M290 catches <span id="dek-pb"></span>, at <span id="dek-pbfc"></span> false alarms per
   layer; an overheating spot in the heat image is caught above <strong><span id="dek-ot"></span></strong> at
   one false alarm per layer; and an acceptance rule of six tensile coupons catches a <span id="dek-drop"></span> percent
-  drop in strength only <strong><span id="dek-catch"></span> of the time</strong>, which is why qualification is where
-  printing goes to die.</p>
+  drop in strength only <strong><span id="dek-catc which is the arithmetic behind the industry's complaint that printing stalls in qualification.</p>
   <div class="byline"><span>Bolga&ccedil; G&uuml;len &middot; Odense, 2026</span><span>&middot;</span><a href="https://github.com/bolgacg/right-to-print">source and data</a>
     <button class="tour-open" id="tourbtn">Walk me through it</button></div>
 </div></header>
@@ -107,7 +106,7 @@ __CSS__
     <div class="chips" id="n-ctl" style="margin:14px 0 8px"></div>
     <div class="viz" id="oc-chart"><div class="tip"></div></div>
     <p class="note" id="oc-note"></p>
-    <div class="verdict sting"><b>The number that decides the rule.</b> <span id="oc-verdict"></span></div>
+    <div class="verdict sting"><b>How often the rule lets a weak build through.</b> <span id="oc-verdict"></span></div>
   </div>
   <div class="card">
     <h3>Density is not strength</h3>
@@ -131,7 +130,7 @@ __CSS__
     <div class="stat" id="pol-stat"></div>
     <div class="tscroll" style="margin-top:14px"><table id="pol-table"></table></div>
     <p class="note" id="pol-note"></p>
-    <div class="verdict"><b>What a project developer takes to a partner.</b> <span id="pol-verdict"></span></div>
+    <div class="verdict"><b>What this means for a partner conversation.</b> <span id="pol-verdict"></span></div>
   </div>
 </div></section>
 
@@ -173,10 +172,7 @@ __CSS__
 
 <footer><div class="wrap"><span>Bolga&ccedil; G&uuml;len &middot; every number on this page is computed from the datasets named above</span><a href="../">back to the console</a></div></footer>
 
-<div id="tour"><div class="wrap">
-  <div class="tk" id="tour-k"></div><div class="tx" id="tour-tx"></div>
-  <div class="nav"><button class="tbtn" id="tour-skip">Close</button><button class="tbtn primary" id="tour-next">Next</button></div>
-</div></div>
+<div id="tour"><div class="tour-hl" id="tour-hl"></div><div class="tour-card" id="tour-card"></div></div>
 
 <script>
 const D = __DATA__;
@@ -250,12 +246,12 @@ function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.014098240830
     const f=R.fit;
     $("#pod-stat").innerHTML=[["flaws caught",Math.round(100*R.rate)+"%",`${R.hits.reduce((a,b)=>a+b,0)} of ${R.hits.length} boxes`],["a50",f&&f.a50?fmt(f.a50,1)+" mm":"n/a","caught half the time"],["a90",f&&f.a90?fmt(f.a90,1)+" mm":"n/a","caught nine times in ten"],["a90/95",f&&f.a9095?fmt(f.a9095,1)+" mm":"n/a","with 95 percent confidence"],["false alarms",fc+" / layer",`threshold ${fmt(R.thr,3)} on ${fmt(P.windows_per_image,0)} windows`]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
     $("#pod-table").innerHTML=`<tr><th class="l">size bin, mm</th><th>flaws</th><th>caught</th><th>hit rate</th><th>95% lower bound</th></tr>`+R.bins.map(b=>`<tr><td class="l num">${fmt(b.lo,1)} to ${fmt(b.hi,1)}</td><td class="num">${b.n}</td><td class="num">${b.k}</td><td class="num">${Math.round(100*b.hit)}%</td><td class="num">${Math.round(100*b.lower)}%</td></tr>`).join("");
-    $("#pod-note").textContent=(f?`Logistic fit b0 = ${fmt(f.b0,2)}, b1 = ${fmt(f.b1,2)} on ln(size). `:`At this setting the detector catches ${R.rate>0.5?"nearly everything":"almost nothing"}, so no curve is fitted; the per-bin lower bounds are the honest statement. `)+`Detector: ${P.features.join(", ")}; trained on ${P.train_images} inspected images from the other two builds. Sizes are box longest sides converted at ${fmt(P.mm_per_px,3)} mm per pixel (${P.mm_note}).`;
+    $("#pod-note").textContent=(f?`Logistic fit b0 = ${fmt(f.b0,2)}, b1 = ${fmt(f.b1,2)} on ln(size). `:`At this setting the detector catches ${R.rate>0.5?"nearly everything":"almost nothing"}, so no curve is fitted; the per-bin lower bounds are the statement the data supports. `)+`Detector: ${P.features.join(", ")}; trained on ${P.train_images} inspected images from the other two builds. Sizes are box longest sides converted at ${fmt(P.mm_per_px,3)} mm per pixel (${P.mm_note}).`;
     // verdict across operating points
     const lo=compute(sensor,OPS[1]), hi=compute(sensor,OPS[6]);
     $("#pod-verdict").textContent = sensor==="PB"
       ? `The powder-bed camera is a poor witness for faint streaks: at ${OPS[1]} false alarms per layer it catches ${Math.round(100*lo.rate)} percent of the labelled streaks, at ${OPS[6]} it catches ${Math.round(100*hi.rate)} percent${hi.fit&&hi.fit.a9095?` and reaches a90/95 at ${fmt(hi.fit.a9095,0)} mm`:""}. Ten false alarms per layer over a few thousand layers is tens of thousands of alerts a build, which is the silent-alarm failure the release policy must plan for. A streak the camera does not see is a layer nobody re-inspects.`
-      : `The heat image is a strong witness for overheating: at ${OPS[3]} false alarm per layer it catches ${Math.round(100*compute(sensor,OPS[3]).rate)} percent of the labelled regions${compute(sensor,OPS[3]).fit&&compute(sensor,OPS[3]).fit.a9095?`, with a90/95 at ${fmt(compute(sensor,OPS[3]).fit.a9095,1)} mm`:""}; at ${OPS[1]} it still catches ${Math.round(100*lo.rate)} percent. Overheating of a few millimetres is what this sensor exists for, and here it earns its place in a release policy; what it cannot see is a pore under the surface, which is the CT scan's job.`;
+      : `The heat image is a strong witness for overheating: at ${OPS[3]} false alarm per layer it catches ${Math.round(100*compute(sensor,OPS[3]).rate)} percent of the labelled regions${compute(sensor,OPS[3]).fit&&compute(sensor,OPS[3]).fit.a9095?`, with a90/95 at ${fmt(compute(sensor,OPS[3]).fit.a9095,1)} mm`:""}; at ${OPS[1]} it still catches ${Math.round(100*lo.rate)} percent. Overheating of a few millimetres is what this sensor exists for, and here it belongs in a release policy; what it cannot see is a pore under the surface, which is the CT scan's job.`;
   }
   draw();
   const pb=compute("PB",OPS[4]), ot=compute("OT",OPS[3]);
@@ -329,7 +325,7 @@ function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.014098240830
 })();
 
 /* ---------- limits ---------- */
-$("#limits-text").textContent=`The detector is deliberately simple; a trained network would catch more at the same false-alarm rate, and the curves here are a floor, not the sensor's ceiling. Unlabelled images were left aside rather than treated as clean, and windows away from the boxes in inspected images are the clean reference, which assumes the annotators found everything they drew nothing around. Box sizes are converted to millimetres with an estimated plate scale, not a calibration. The coupon chapter uses one machine, one alloy and one laboratory, and treats a weak build as a shift of the mean only. The policy chapter has no dimensional or surface data and takes those as passing. The fatigue chapter mixes studies with different surface conditions and heat treatments on purpose, to show the spread a release policy inherits from the literature. Nothing here is a certification claim; it is the arithmetic a certification claim would have to survive.`;
+$("#limits-text").textContent=`The detector is deliberately simple; a trained network would catch more at the same false-alarm rate, and the curves here are a floor, not the sensor's ceiling. Unlabelled images were left aside rather than treated as clean, and windows away from the boxes in inspected images are the clean reference, which assumes the annotators found everything they drew nothing around. Box sizes are converted to millimetres with an estimated plate scale, not a calibration. The coupon chapter uses one machine, one alloy and one laboratory, and treats a weak build as a shift of the mean only. The policy chapter has no dimensional or surface data and takes those as passing. The fatigue chapter mixes studies with different surface conditions and heat treatments on purpose, to show the spread a release policy inherits from the literature. Nothing here is a certification claim; it is the arithmetic any certification claim would have to pass.`;
 
 /* ---------- walkthrough ---------- */
 const TOUR=[
@@ -343,12 +339,37 @@ const TOUR=[
  ["Then","Method, sources, limits."]
 ];
 const ANCH=["header","#primer","#words","#act1","#act2","#act3","#act4","#coda"];
-const tour={i:0,open(i){this.i=i;$("#tour").classList.add("on");this.render(true)},close(){$("#tour").classList.remove("on");try{localStorage.setItem("rtp-q-tour","seen")}catch(e){}},
-  render(sc){const [k,t]=TOUR[this.i];$("#tour-k").textContent=`${this.i+1} of ${TOUR.length} · ${k}`;$("#tour-tx").innerHTML=t;$("#tour-next").textContent=this.i===TOUR.length-1?"Done":"Next";
-    if(sc){const el=document.querySelector(ANCH[this.i]); if(el) window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-16),behavior:"smooth"});}},
-  next(){if(this.i>=TOUR.length-1){this.close();return} this.i++;this.render(true)}};
-$("#tour-next").addEventListener("click",()=>tour.next());$("#tour-skip").addEventListener("click",()=>tour.close());$("#tourbtn").addEventListener("click",()=>tour.open(0));
-if(!location.search.includes("tour=off")){try{if(localStorage.getItem("rtp-q-tour")!=="seen")setTimeout(()=>tour.open(0),600)}catch(e){setTimeout(()=>tour.open(0),600)}}
+const TOURKEY="rtp-q-tour-v2";
+const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length}`, html:t[1]}));
+(function(){
+  const root=$('#tour'), hl=$('#tour-hl'), card=$('#tour-card'); let idx=0;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function place(){
+    const st=STEPS[idx]; const elm=document.querySelector(st.sel); if(!elm){next();return;}
+    elm.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+    setTimeout(()=>{
+      const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
+      root.style.height=document.documentElement.scrollHeight+'px';
+      const hh=Math.min(r.height, innerHeight-80);
+      hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
+      const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
+      card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
+      const cw=Math.min(400, innerWidth-32); let cx=r.left+sx+r.width+18, cy=r.top+sy;
+      if(cx+cw>sx+innerWidth-16){
+        if(r.top+hh+16+250<innerHeight){ cx=Math.max(16+sx, r.left+sx); cy=r.top+sy+hh+16; }
+        else { cx=sx+innerWidth-16-cw; cy=sy+innerHeight-270; }
+      }
+      card.style.left=cx+'px'; card.style.top=Math.max(sy+16,cy)+'px';
+      $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
+    }, reduced?50:450);
+  }
+  function next(){ if(idx>=STEPS.length-1){stop();return;} idx++; place(); }
+  function stop(){ root.classList.remove('on'); try{localStorage.setItem(TOURKEY,'seen')}catch(e){} }
+  function start(){ idx=0; root.classList.add('on'); place(); }
+  $('#tourbtn').addEventListener('click', start);
+  window.addEventListener('resize', ()=>{ if(root.classList.contains('on')) place(); });
+  if(!location.search.includes("tour=off")){try{if(localStorage.getItem(TOURKEY)!=="seen")setTimeout(start,700)}catch(e){setTimeout(start,700)}}
+})();
 </script>
 </body>
 </html>
