@@ -522,16 +522,18 @@ const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length
     setTimeout(()=>{
       const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
       root.style.height=document.documentElement.scrollHeight+'px';
-      const hh=Math.min(r.height, innerHeight-80);
+      const cw=Math.min(400, innerWidth-32), ch=250;
+      const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
+      // the highlight never has the card on top of it: the card goes to the right when there is room,
+      // otherwise the highlight is shortened to leave room for the card below it, inside the viewport
+      const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - r.top - ch - 40));
       hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
       const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
       card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
-      const cw=Math.min(400, innerWidth-32); let cx=r.left+sx+r.width+18, cy=r.top+sy;
-      if(cx+cw>sx+innerWidth-16){
-        if(r.top+hh+16+250<innerHeight){ cx=Math.max(16+sx, r.left+sx); cy=r.top+sy+hh+16; }
-        else { cx=sx+innerWidth-16-cw; cy=sy+innerHeight-270; }
-      }
-      card.style.left=cx+'px'; card.style.top=Math.max(sy+16,cy)+'px';
+      let cx, cy;
+      if(fitsRight){ cx=r.left+sx+r.width+18; cy=r.top+sy; }
+      else { cx=Math.min(r.left+sx, sx+innerWidth-16-cw); cy=r.top+sy+hh+22; }
+      card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(sy+16,cy)+'px';
       $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
     }, reduced?50:450);
   }
@@ -540,7 +542,7 @@ const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length
   function start(){ idx=0; root.classList.add('on'); place(); }
   $('#tourbtn').addEventListener('click', start);
   window.addEventListener('resize', ()=>{ if(root.classList.contains('on')) place(); });
-  if(!location.search.includes("tour=off")){try{if(localStorage.getItem(TOURKEY)!=="seen")setTimeout(start,700)}catch(e){setTimeout(start,700)}}
+  if(!location.search.includes("tour=off")) setTimeout(start,700);
 })();
 </script>
 </body>
