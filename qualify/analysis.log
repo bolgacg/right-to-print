@@ -1,0 +1,20 @@
+09:53:48 [PB] loading
+09:58:10 [PB] train images 534, test images 996, unlabelled left aside 1108, windows 235346 (21918 inside boxes)
+09:58:11 [PB] 0.25 false calls/image: hit rate 0.132, a50 None, a90 None, a90/95 None
+09:58:11 [PB] 1 false calls/image: hit rate 0.317, a50 807.7719866430762, a90 None, a90/95 None
+09:58:11 [PB] 3 false calls/image: hit rate 0.735, a50 5.424847852388997, a90 278.554770647287, a90/95 360.14389566847115
+09:58:11 [PB] 10 false calls/image: hit rate 0.981 (saturated, binomial bounds only)
+09:58:11 [OT] loading
+10:07:50 [OT] train images 156, test images 966, unlabelled left aside 1552, windows 76534 (14134 inside boxes)
+10:07:55 [OT] 0.25 false calls/image: hit rate 0.772, a50 4.4238165562328415, a90 21.783508380476054, a90/95 23.64124013172656
+10:07:55 [OT] 1 false calls/image: hit rate 0.930, a50 1.3885910448891543, a90 6.282219966915489, a90/95 6.81662252943908
+10:07:56 [OT] 3 false calls/image: hit rate 0.989 (saturated, binomial bounds only)
+10:07:56 [OT] 10 false calls/image: hit rate 1.000 (saturated, binomial bounds only)
+/home/bolgac/projects/right-to-print/.venv/lib/python3.12/site-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+/home/bolgac/projects/right-to-print/.venv/lib/python3.12/site-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Conditional Formatting extension is not supported and will be removed
+  warn(msg)
+10:08:01 wrote docs/qualify/data.json in 852s
+10:08:01 PCRD {'n': 20, 'sets': 5, 'uts_mean': 1067.9, 'uts_sd': 36.25334830271398, 'el_mean': 12.502705, 'el_sd': 3.6042398856252036, 'uts_p1': 1009.57, 'el_p1': 3.793363} k 2.39 need {'3': 34, '5': 12, '8': 4} corr -0.66 -0.64
+10:08:01 policy counts {'emergency only': 15, 'scrap': 13, 'temporary': 5, 'permanent': 2} dense-but-fail [31, 32, 42] porous-but-pass [7, 8, 9, 10, 11, 13, 14, 15, 30, 35, 40]
+10:08:01 fatigue 561 datasets 3749 points [{'lo': 12.570043157651178, 'hi': 150.14218232566938, 'n': 547, 'log_life_sd': 0.9442102146291276, 'log_life_mean': 5.7246052304857855}, {'lo': 150.14218232566938, 'hi': 224.88512663929723, 'n': 546, 'log_life_sd': 0.9646245284740741, 'log_life_mean': 5.375521340201676}]

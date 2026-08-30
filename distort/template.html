@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Will the part come out the shape it was drawn?</title>
+<meta name="description" content="Distortion of a laser powder-bed fusion part on a public benchmark: the AM-Bench 2018 bridge, its measured springback, an inherent-strain model calibrated with one scalar, the pre-deformed design, and what a model error does to the compensation. Bolgac Gulen, 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+__CSS__
+<style>canvas.sec{width:100%;image-rendering:pixelated;border:1px solid var(--rule);border-radius:4px;background:#fff}</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="eyebrow">The right to print &middot; chapter three &middot; distortion, on a public benchmark</div>
+  <h1>Will the part come out the shape it was drawn?</h1>
+  <p class="dek">A metal part printed layer by layer is full of locked-in stress by the time it is finished. Cut it from the
+  plate and it springs. In 2018 the US standards institute printed a small bridge, cut its legs free and measured the
+  spring: <strong id="dek-meas"></strong> at the far end. It then asked the world's modellers to predict that number blind.
+  <strong>None of them met the criteria.</strong> This chapter does not claim to; it calibrates one scalar to that
+  measurement, and then does the two things a centre can honestly do with such a model: read the shape of the springback
+  along the part and the legs that carry it, and pre-deform the design so the printed part comes out flat, which works
+  exactly in the model and only as well as the model in the machine.</p>
+  <div class="byline"><span>Bolga&ccedil; G&uuml;len &middot; Odense, 2026</span><span>&middot;</span><a href="https://github.com/bolgacg/right-to-print">source and data</a>
+    <button class="tour-open" id="tourbtn">Walk me through it</button></div>
+</div></header>
+
+<section id="primer"><div class="wrap">
+  <div class="sec-label">Before the chapter &middot; five things to know</div>
+  <div class="primer">
+    <p>In laser powder-bed fusion each new layer is melted onto a colder part below. As the melt cools it wants to shrink;
+    the part below will not let it. The layer ends up stretched, the part below squeezed, and the print finishes with
+    <strong>residual stress</strong> locked inside it.</p>
+    <p>While the part is welded to the build plate the plate holds it straight. Cut it free and the stress is released:
+    the part <strong>springs</strong>, usually upward at the ends, and a flat design comes out curved.</p>
+    <p>The <strong>AM-Bench bridge</strong> is a benchmark part built by NIST: 75 mm long, 12.5 mm tall, 5 mm wide, standing
+    on twelve small legs and one thick end. The legs are cut with a wire and the rise of the eleven ridges on top is
+    measured. The measurement is public; the modelling was a blind competition.</p>
+    <p>The <strong>inherent-strain method</strong> is the workhorse model: instead of simulating the laser, each layer is
+    given the shrinkage it is left with once it has cooled and yielded, and the part is built up layer by layer with that
+    shrinkage fighting the structure below. One number, the inherent strain, carries all the thermal detail.</p>
+    <p><strong>Compensation</strong> means printing the mirror image of the predicted springback so that design plus spring
+    equals the drawing. It is only as right as the model that predicted the spring, and that is the whole point of the
+    last act.</p>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <div class="sec-label" style="margin-bottom:2px">The domain, drawn from the benchmark's own geometry file</div>
+    <canvas class="sec" id="section"></canvas>
+    <p class="note" id="section-note"></p>
+  </div>
+  <h3 style="margin-top:24px;font-size:17px">Six terms used below</h3>
+  <div class="gloss">
+    <div><b>ridge</b> one of eleven raised strips along the top of the bridge; the measurement points</div>
+    <div><b>leg</b> one of twelve thin supports under the bridge, cut free after the build; leg 1 is under ridge 1</div>
+    <div><b>inherent strain, e*</b> the locked-in shrinkage per layer, dimensionless; negative means the layer wants to be shorter</div>
+    <div><b>springback</b> the movement of the part when the legs are cut, here the rise of each ridge in millimetres</div>
+    <div><b>calibration</b> choosing e* so the model reproduces one measured number; the opposite of a blind prediction</div>
+    <div><b>pre-deformation</b> the mirror-image design that is meant to come out flat</div>
+  </div>
+</div></section>
+
+<section id="words"><div class="wrap">
+  <div class="sec-label">In the words of the people who own this problem</div>
+  <div class="quote">"Half of the simulations overpredicted the deflection, and the other half underpredicted the deflection by roughly the same amount. None of the simulations matched the measurements well enough to meet the success criteria."
+    <span class="who">Levine et al., Outcomes and Conclusions from the 2018 AM-Bench Measurements, Challenge Problems, Modeling Submissions, and Conference, Integrating Materials and Manufacturing Innovation, 2020, on the part-deflection challenge</span></div>
+  <div class="quote">A Danish-American residual-stress centre of excellence, for the operational reliability of military aircraft.
+    <span class="who">The Danish Technological Institute's defence page, on its Lockheed Martin offset collaboration, 2026</span></div>
+  <div class="quote">"Simulate each production step before printing."
+    <span class="who">The Danish Technological Institute's simulation page for industrial 3D print, Anders Hjermitslev as contact</span></div>
+</div></section>
+
+<section id="act1"><div class="wrap">
+  <div class="sec-label">Act one &middot; The spring</div>
+  <h2>Where the bridge rises, and which legs are holding it down</h2>
+  <p class="lede">The model builds the bridge in <span class="num" id="n-layers"></span> layers of <span class="num" id="h-layer"></span> mm
+  on a <span class="num" id="n-elem"></span>-element mesh of its cross-section, with the inherent strain calibrated so that
+  cutting all twelve legs lifts ridge 1 by the measured <span class="num" id="meas2"></span>. The thick end stays welded to
+  the plate, as it did in the benchmark. <strong>Cut the legs one by one</strong> and watch the profile: the spring is not
+  released by the first cut, or the fifth.</p>
+  <div class="card">
+    <div class="ctl"><label><div class="hint">Legs cut free, from the ridge-1 end</div><input type="range" id="ncut" min="1" max="12" step="1" value="12"><span class="val" id="ncut-val"></span></label></div>
+    <div class="viz" id="profile-chart"><div class="tip"></div></div>
+    <div class="stat" id="profile-stat"></div>
+    <p class="note" id="profile-note"></p>
+    <div class="verdict"><b>What the profile says.</b> <span id="profile-verdict"></span></div>
+  </div>
+</div></section>
+
+<section id="act2"><div class="wrap">
+  <div class="sec-label">Act two &middot; The correction</div>
+  <h2>Print the mirror image, and it comes out flat, if the model was right</h2>
+  <p class="lede">Compensation is arithmetic once the springback is known: subtract it from the drawing, print that, and the
+  spring puts the ridges back on the line. In a linear model that is exact after one iteration, which tells you nothing.
+  The question that matters is what happens when the model is wrong by a plausible amount, which the 2018 blind round
+  says it will be. <strong>Move the model error</strong> and read the residual.</p>
+  <div class="card">
+    <div class="ctl"><label><div class="hint">The real inherent strain relative to the calibrated one (the blind submissions in 2018 missed by about this much either way)</div><input type="range" id="err" min="-40" max="40" step="5" value="20"><span class="val" id="err-val"></span></label></div>
+    <div class="viz" id="comp-chart"><div class="tip"></div></div>
+    <div class="stat" id="comp-stat"></div>
+    <div class="verdict sting"><b>The honest sentence about compensation.</b> <span id="comp-verdict"></span></div>
+  </div>
+</div></section>
+
+<section id="coda"><div class="wrap">
+  <div class="sec-label">Context, method, limits</div>
+  <h2>How this was built</h2>
+  <p class="small" id="method-text"></p>
+  <div class="limits">
+    <h3 style="font-size:17px;margin-bottom:6px">Limits</h3>
+    <p id="limits-text"></p>
+  </div>
+  <p class="small" style="margin-top:14px">Sources: NIST AM-Bench, AMB2018-01 description and CHAL-AMB2018-01-PD results
+  (part AMB2018-01-625-CBM-B1-P3, 1.276 mm at ridge 1; the 15-5PH part, 1.168 mm), and the part geometry file
+  AMB2018_01_Part.STL from the AM-Bench 2018 test-description record; Levine et al., IMMI 2020, the outcomes paper; the
+  inherent-strain method as used in industrial distortion software and described in the open literature.</p>
+</div></section>
+
+<footer><div class="wrap"><span>Bolga&ccedil; G&uuml;len &middot; every number on this page is computed by distort/simulate.py from the benchmark geometry</span><a href="../">back to the console</a></div></footer>
+
+<div id="tour"><div class="wrap">
+  <div class="tk" id="tour-k"></div><div class="tx" id="tour-tx"></div>
+  <div class="nav"><button class="tbtn" id="tour-skip">Close</button><button class="tbtn primary" id="tour-next">Next</button></div>
+</div></div>
+
+<script>
+const D = __DATA__;
+const $ = s => document.querySelector(s);
+const fmt = (n,d) => n == null ? "" : Number(n).toLocaleString("en-GB",{maximumFractionDigits: d==null?1:d});
+const G = D.geometry, R = D.ridge_deflection_mm, X = G.ridges.map(r => (r[0]+r[1])/2);
+$("#dek-meas").textContent = fmt(D.measured_ridge1_mm,3)+" mm"; $("#meas2").textContent = fmt(D.measured_ridge1_mm,3)+" mm";
+$("#n-layers").textContent = D.mesh.nz; $("#h-layer").textContent = D.mesh.h_mm; $("#n-elem").textContent = fmt(D.mesh.solid_elements,0);
+
+/* section drawing */
+(function(){
+  const S = D.section, nx = S.length, nz = S[0].length, sc = 4;
+  const cv = $("#section"); cv.width = nx*sc; cv.height = nz*sc + 28; const c = cv.getContext("2d");
+  c.fillStyle="#fff"; c.fillRect(0,0,cv.width,cv.height);
+  for(let i=0;i<nx;i++) for(let j=0;j<nz;j++) if(S[i][j]) { c.fillStyle="#1a1d21"; c.fillRect(i*sc, (nz-1-j)*sc, sc, sc); }
+  c.fillStyle="#2c4a6b"; c.font="11px IBM Plex Mono, monospace";
+  G.legs.forEach((l,k)=>{ if(k<12){ const x=(l[0]+l[1])/2/D.mesh.h_mm*sc; c.fillText(String(k+1), x-3, nz*sc+12); } else { c.fillText("thick end, stays on the plate", l[0]/D.mesh.h_mm*sc, nz*sc+12); } });
+  c.fillStyle="#b03a3a"; G.ridges.forEach((r,k)=>{ const x=(r[0]+r[1])/2/D.mesh.h_mm*sc; c.fillText("r"+(k+1), x-6, nz*sc+25); });
+  $("#section-note").textContent = `The bridge's cross-section from the benchmark's STL file, ${G.length_mm} mm long and ${G.height_mm} mm tall on the mesh, meshed at ${D.mesh.h_mm} mm. Twelve thin legs numbered from the ridge-1 end (blue), eleven ridges on top (red, r1 to r11), and the thick end at the right that stays welded to the plate. The legs alternate 5, 0.5 and 2.5 mm wide, which is the benchmark's way of varying the heat each leg sees.`;
+})();
+
+/* act one */
+(function(){
+  const seq = D.cut_sequence;
+  const el = $("#ncut"); const show = () => { $("#ncut-val").textContent = el.value + (el.value==="12" ? " (all)" : ""); };
+  function draw(){
+    show(); const n = +el.value; const row = seq.find(s => s.legs_cut === n); const ys = row.ridges;
+    const cont = $("#profile-chart"); cont.querySelectorAll("svg,.legend").forEach(x=>x.remove());
+    const W=960,H=300,P={l:56,r:16,t:16,b:44}; const y1 = Math.max(D.measured_ridge1_mm, ...R)*1.15, y0 = Math.min(0, ...R, ...ys)*1.15;
+    const Xs = x => P.l + x/G.length_mm*(W-P.l-P.r), Ys = y => P.t + (1-(y-y0)/(y1-y0))*(H-P.t-P.b);
+    let g = "";
+    for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4; g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Ys(v)}" y2="${Ys(v)}" stroke="var(--rule)"/><text x="${P.l-7}" y="${Ys(v)+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${fmt(v,2)}</text>`}
+    [0,15,30,45,60,75].filter(v=>v<=G.length_mm).forEach(v=>{g+=`<text x="${Xs(v)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v} mm</text>`});
+    g+=`<text x="${(P.l+W-P.r)/2}" y="${H+12}" text-anchor="middle" font-size="11" fill="var(--soft)" font-family="var(--mono)">position along the bridge; ridge 1 at the left, the thick end at the right</text>`;
+    // legs on the axis
+    G.legs.forEach((l,k)=>{ g+=`<rect x="${Xs(l[0])}" y="${Ys(0)-2}" width="${Math.max(2,Xs(l[1])-Xs(l[0]))}" height="6" fill="${k<n?"var(--neg)":"var(--soft)"}"><title>leg ${k+1}${k<n?" cut":" attached"}</title></rect>`; });
+    g+=`<path d="${R.map((v,i)=>(i?"L":"M")+Xs(X[i]).toFixed(1)+" "+Ys(v).toFixed(1)).join(" ")}" fill="none" stroke="var(--rule2)" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    g+=`<path d="${ys.map((v,i)=>(i?"L":"M")+Xs(X[i]).toFixed(1)+" "+Ys(v).toFixed(1)).join(" ")}" fill="none" stroke="var(--s1)" stroke-width="2.4"/>`;
+    ys.forEach((v,i)=>{g+=`<circle cx="${Xs(X[i])}" cy="${Ys(v)}" r="4" fill="var(--s1)"><title>ridge ${i+1}: ${fmt(v,3)} mm</title></circle>`});
+    g+=`<circle cx="${Xs(X[0])}" cy="${Ys(D.measured_ridge1_mm)}" r="7" fill="none" stroke="var(--neg)" stroke-width="2"/><text x="${Xs(X[0])+11}" y="${Ys(D.measured_ridge1_mm)+4}" font-size="11" fill="var(--neg)" font-family="var(--mono)">measured, ridge 1: ${fmt(D.measured_ridge1_mm,3)} mm</text>`;
+    cont.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="ridge rise along the bridge">${g}</svg><div class="legend"><span><i style="border-top-color:var(--s1)"></i>rise of each ridge with ${n} leg${n>1?"s":""} cut</span><span><i style="border-top-color:var(--rule2);border-top-style:dashed"></i>all twelve cut</span><span><i class="dot" style="background:var(--neg)"></i>cut legs</span><span><i class="dot" style="background:var(--soft)"></i>attached legs</span></div>`);
+    const last = seq[seq.length-1].ridges[0];
+    $("#profile-stat").innerHTML=[["ridge 1",fmt(ys[0],3)+" mm",`of ${fmt(last,3)} when all are cut`],["ridge 6",fmt(ys[5],3)+" mm","mid-span"],["ridge 11",fmt(ys[10],3)+" mm","next to the thick end"],["calibrated e*",fmt(D.estar_calibrated*1000,2)+" per mille","one scalar, from ridge 1"]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+    const half = seq.findIndex(s => s.ridges[0] >= 0.5*last) + 1;
+    $("#profile-note").textContent=`Cutting the first ${half} leg${half>1?"s":""} releases half of the final rise at ridge 1; the profile with all legs cut is the dashed line. The measured value is a single point, ridge 1, so the model's shape along the bridge is a prediction that this page cannot check; the 55-point CMM record exists at NIST and would check it.`;
+    $("#profile-verdict").textContent=`The spring is cumulative: each cut hands the stress the leg was holding to the legs still attached, so the rise at the free end grows with every cut and the last few legs, next to the thick end, carry the most. A cut order is therefore a process decision, not a finishing detail, and a part whose legs are cut in the wrong order can crack before it is free. That is the kind of step the centre's own page says to simulate before printing.`;
+  }
+  el.addEventListener("input", draw); draw();
+})();
+
+/* act two */
+(function(){
+  const el = $("#err");
+  function draw(){
+    const e = +el.value; $("#err-val").textContent = (e>0?"+":"")+e+" percent";
+    const k = 1 + e/100; const corr = R.map(v => -v); const asbuilt = R.map((v,i) => corr[i] + v*k); const resid = asbuilt;
+    const cont = $("#comp-chart"); cont.querySelectorAll("svg,.legend").forEach(x=>x.remove());
+    const W=960,H=300,P={l:56,r:16,t:16,b:44}; const all=[...corr,...asbuilt,...R]; const y1=Math.max(...all)*1.15, y0=Math.min(...all)*1.15;
+    const Xs = x => P.l + x/G.length_mm*(W-P.l-P.r), Ys = y => P.t + (1-(y-y0)/(y1-y0))*(H-P.t-P.b);
+    let g=""; for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4; g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Ys(v)}" y2="${Ys(v)}" stroke="var(--rule)"/><text x="${P.l-7}" y="${Ys(v)+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${fmt(v,2)}</text>`}
+    g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Ys(0)}" y2="${Ys(0)}" stroke="var(--ink)"/>`;
+    [0,15,30,45,60,75].filter(v=>v<=G.length_mm).forEach(v=>{g+=`<text x="${Xs(v)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v} mm</text>`});
+    const path=(arr,col,dash)=>`<path d="${arr.map((v,i)=>(i?"L":"M")+Xs(X[i]).toFixed(1)+" "+Ys(v).toFixed(1)).join(" ")}" fill="none" stroke="${col}" stroke-width="2.2" ${dash?'stroke-dasharray="5 4"':''}/>`;
+    g+=path(corr,"var(--s2)",true)+path(R,"var(--rule2)",true)+path(asbuilt,"var(--s1)",false);
+    cont.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="compensation">${g}</svg><div class="legend"><span><i style="border-top-color:var(--s2);border-top-style:dashed"></i>pre-deformed design (the mirror of the predicted spring)</span><span><i style="border-top-color:var(--rule2);border-top-style:dashed"></i>predicted spring</span><span><i style="border-top-color:var(--s1)"></i>what comes out if the real e* is ${e>=0?"+":""}${e} percent off</span></div>`);
+    const mx = Math.max(...resid.map(Math.abs));
+    $("#comp-stat").innerHTML=[["largest residual",fmt(mx*1000,0)+" um",`with the model ${e>=0?"+":""}${e} percent off`],["uncorrected",fmt(Math.max(...R.map(Math.abs))*1000,0)+" um","the spring left alone"],["gain",fmt(Math.max(...R.map(Math.abs))/Math.max(mx,1e-9),1)+"x","flatter than uncorrected"]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+    $("#comp-verdict").textContent=`With the model ${e>=0?"+":""}${e} percent off, the compensated part still comes out ${fmt(mx*1000,0)} micrometres from flat at its worst ridge, against ${fmt(Math.max(...R.map(Math.abs))*1000,0)} uncorrected. The residual is exactly the model error times the spring: compensation does not remove the need for a good model, it multiplies the model's error by a smaller number. In 2018 the blind models missed this bridge by roughly that much either way; the honest offer to a partner is one calibration print per part family, and this arithmetic for what it buys.`;
+  }
+  el.addEventListener("input", draw); draw();
+})();
+
+$("#method-text").textContent=`The cross-section is read from the benchmark's STL (${fmt(D.mesh.solid_elements,0)} solid elements of ${D.mesh.h_mm} mm, plane stress, Poisson's ratio 0.3). Layers are activated from the plate up, one element row at a time; the newest row receives an isotropic inherent strain e* while everything below resists; stresses accumulate; the feet are fixed to the plate throughout. Cutting releases the fixed feet of the chosen legs and solves for the springback that puts the stressed part back in equilibrium. Displacements in a linear model scale with e*, so the calibration is a single multiplication: e* = ${fmt(D.estar_calibrated*1000,3)} per mille makes ridge 1 rise ${fmt(D.measured_ridge1_mm,3)} mm. Runtime ${fmt(D.seconds,0)} seconds.`;
+$("#limits-text").textContent=`One scalar is calibrated to the one published number; the profile along the bridge and the leg sequence are predictions this page cannot check without NIST's 55-point CMM record. The model is two-dimensional and linear: no plasticity, no temperature dependence, no anisotropy between the scan directions, no build-plate compliance, no wire kerf. Real layers are 20 micrometres; the model lumps twelve of them into one row, which is standard practice for this method and still an approximation. The thick end is assumed to remain welded to the plate, which is how the measurement is described (the maximum rise is at ridge 1). The 15-5PH bridge rose 1.168 mm; a second alloy with the same e* would not, and the page does not pretend it would. Nothing here is a prediction of a part not yet printed.`;
+
+const TOUR=[
+ ["Start here","A benchmark bridge, a measured spring, and a model that is calibrated to it rather than predicting it. <b>Read the first paragraph:</b> in 2018 nobody predicted this number blind."],
+ ["Five things to know","Why a printed part carries stress, what happens when it is cut free, what the bridge is, and what the inherent-strain method does with one number."],
+ ["Act one","<b>Cut the legs one by one.</b> The rise at ridge 1 grows with every cut; the last legs carry the most."],
+ ["Act two","<b>Move the model error.</b> Compensation is exact in the model; what comes out of the machine is the model's error times the spring."],
+ ["Then","Method, sources, limits: one calibrated scalar, two dimensions, no plasticity."]
+];
+const ANCH=["header","#primer","#act1","#act2","#coda"];
+const tour={i:0,open(i){this.i=i;$("#tour").classList.add("on");this.render(true)},close(){$("#tour").classList.remove("on");try{localStorage.setItem("rtp-d-tour","seen")}catch(e){}},
+  render(sc){const [k,t]=TOUR[this.i];$("#tour-k").textContent=`${this.i+1} of ${TOUR.length} · ${k}`;$("#tour-tx").innerHTML=t;$("#tour-next").textContent=this.i===TOUR.length-1?"Done":"Next";
+    if(sc){const el=document.querySelector(ANCH[this.i]); if(el) window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-16),behavior:"smooth"});}},
+  next(){if(this.i>=TOUR.length-1){this.close();return} this.i++;this.render(true)}};
+$("#tour-next").addEventListener("click",()=>tour.next());$("#tour-skip").addEventListener("click",()=>tour.close());$("#tourbtn").addEventListener("click",()=>tour.open(0));
+if(!location.search.includes("tour=off")){try{if(localStorage.getItem("rtp-d-tour")!=="seen")setTimeout(()=>tour.open(0),600)}catch(e){setTimeout(()=>tour.open(0),600)}}
+</script>
+</body>
+</html>

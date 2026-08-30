@@ -31,6 +31,25 @@ self-supporting rule at three build orientations (Langelaar's additive-manufactu
 exact sensitivities). One orientation fails to converge to a usable design and is reported as a
 failure.
 
+## Chapter two: can the camera certify the part?
+
+https://bolgacg.github.io/right-to-print/qualify/ measures the witnesses the release policy relies on,
+on open datasets: probability-of-detection curves for a layer camera and optical tomography (Aalto
+University's annotated EOS M290 dataset, a transparent detector, a held-out build, MIL-HDBK-1823A
+hit/miss model with a false-alarm dial), operating-characteristic curves for an n-coupon acceptance
+rule on Penn State's Ti-6Al-4V tensile data, the four tiers applied to 42 real process windows, and
+the fatigue-life scatter of printed titanium from FatigueData-AM2022. `qualify/analysis.py` computes
+everything; `qualify/build_page.py` writes the page.
+
+## Chapter three: will the part come out the shape it was drawn?
+
+https://bolgacg.github.io/right-to-print/distort/ takes NIST's AM-Bench 2018 bridge (geometry from
+the benchmark's STL, the measured 1.276 mm rise at ridge 1 after the legs were cut), builds it
+layer by layer with a two-dimensional inherent-strain model, calibrates the one scalar to the
+measurement, and then shows the springback profile along the bridge, how it grows as the legs are
+cut in sequence, and what a pre-deformed design comes out like when the model is wrong by a given
+amount. `distort/simulate.py` computes everything in about a minute.
+
 ## How it is built
 
 | file | what it does |

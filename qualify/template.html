@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can the camera certify the part?</title>
+<meta name="description" content="Qualification from process data, measured on open datasets: probability of detection for layer-camera anomalies, how many witness coupons an acceptance rule needs, and the four-tier release policy applied to real process windows. Bolgac Gulen, 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+__CSS__
+<style>
+.dotgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.mini{font-size:13px;color:var(--soft)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="eyebrow">The right to print &middot; chapter two &middot; qualification from process data, on open datasets</div>
+  <h1>Can the camera certify the part?</h1>
+  <p class="dek">The console's <a href="../">release decision</a> took the measurements as given. This chapter asks where
+  they come from. A layer camera watches every layer of a metal print; a witness coupon is pulled apart after the
+  build; a CT scan counts the pores. Each is evidence of a different strength, and a release policy that does not
+  know their strengths is a hope. Three measured answers: a layer camera on an EOS M290 catches <span id="dek-pb"></span>, at <span id="dek-pbfc"></span> false alarms per
+  layer; an overheating spot in the heat image is caught above <strong><span id="dek-ot"></span></strong> at
+  one false alarm per layer; and an acceptance rule of six tensile coupons catches a <span id="dek-drop"></span> percent
+  drop in strength only <strong><span id="dek-catch"></span> of the time</strong>, which is why qualification is where
+  printing goes to die.</p>
+  <div class="byline"><span>Bolga&ccedil; G&uuml;len &middot; Odense, 2026</span><span>&middot;</span><a href="https://github.com/bolgacg/right-to-print">source and data</a>
+    <button class="tour-open" id="tourbtn">Walk me through it</button></div>
+</div></header>
+
+<section id="primer"><div class="wrap">
+  <div class="sec-label">Before the chapter &middot; five things to know</div>
+  <div class="primer">
+    <p>A metal printer spreads a thin layer of powder, melts the part's cross-section into it with a laser, and repeats a
+    few thousand times. Two cameras can watch: a <strong>powder-bed camera</strong> photographs each fresh layer of powder,
+    and <strong>optical tomography</strong> integrates the light of the melt over the layer into a heat image.</p>
+    <p>A <strong>recoater streak</strong> is a line dragged through the fresh powder by the blade that spreads it; a
+    damaged blade or a part sticking up leaves one. <strong>Overheating</strong> is a region where the melt got too hot,
+    usually a thin feature or an overhang, and it leaves pores and rough surfaces.</p>
+    <p><strong>Probability of detection</strong>, POD, is the standard way to say what an inspection can see: the chance of
+    catching a flaw as a function of its size, with a confidence bound. The number that matters is <strong>a90/95</strong>,
+    the size above which the flaw is caught 90 percent of the time, with 95 percent confidence. Below it, flaws pass.</p>
+    <p>Every detector has a dial between catching more flaws and raising more <strong>false alarms</strong>. POD means
+    nothing without the false-alarm rate it was measured at, so it is a slider here, not a footnote.</p>
+    <p>A <strong>witness coupon</strong> is a test bar printed beside the part and pulled apart afterwards. An
+    <strong>acceptance rule</strong> says how many coupons, and how strong; the question nobody asks is how often that rule
+    lets a weak build through.</p>
+  </div>
+  <h3 style="margin-top:24px;font-size:17px">Eight terms used below</h3>
+  <div class="gloss">
+    <div><b>LPBF</b> laser powder-bed fusion, the process both datasets come from</div>
+    <div><b>EOS M290</b> a widely used LPBF machine; the layer images here come from one at Aalto University</div>
+    <div><b>hit / miss</b> whether a labelled flaw was flagged by the detector at a given setting</div>
+    <div><b>a50, a90, a90/95</b> the flaw size caught half the time, nine times in ten, and nine times in ten with 95 percent confidence</div>
+    <div><b>false calls per layer</b> windows flagged on the inspected parts of a layer image where the annotator drew nothing</div>
+    <div><b>UTS, yield, elongation</b> the strength at which a tensile bar breaks, the stress at which it starts to deform permanently, how much it stretched before breaking</div>
+    <div><b>reference distribution</b> the spread of coupon results from builds known to be good; the yardstick an acceptance rule is measured against</div>
+    <div><b>operating characteristic</b> the curve of "probability the rule accepts" against "how bad the build really is"</div>
+  </div>
+</div></section>
+
+<section id="words"><div class="wrap">
+  <div class="sec-label">In the words of the people who own this problem</div>
+  <div class="quote">Quality must increasingly be documented through process data rather than inspection afterwards.
+    <span class="who">Jeppe Byskov, head of the industrial 3D-print centre at the Danish Technological Institute, ing.dk, April 2026 (paraphrased from Danish)</span></div>
+  <div class="quote">DILACERT: software that certifies the printed product while it is being manufactured, from the production data, so that a part printed on an oil rig or in a military operation can be released without external testing.
+    <span class="who">DILAPRO, Horizon Europe, coordinated by the Danish Technological Institute; project description, 2024</span></div>
+  <div class="quote">A "fast-response digital twin" for a field printer: layer imagery (streaking, spatter, warpage, smoke) correlated with CT porosity, geometry and mechanical tests, feeding four acceptance levels.
+    <span class="who">The DISCMAM project, method described in Additive Manufacturing Media, July 2026</span></div>
+  <div class="quote">"Advanced manufacturing often dies in qualification and testing."
+    <span class="who">Hamid Zarringhalam, Nikon Advanced Manufacturing, quoted in Forbes, December 2025</span></div>
+</div></section>
+
+<section id="act1"><div class="wrap">
+  <div class="sec-label">Act one &middot; What the camera sees</div>
+  <h2>Probability of detection, measured on <span class="num" id="n-boxes"></span> labelled flaws from one held-out build</h2>
+  <p class="lede">Aalto University published <span class="num" id="n-images"></span> layer images from three builds on an EOS M290 in
+  316L stainless steel, with every recoater streak and every overheated region drawn as a box by hand. A small,
+  transparent detector (four hand-written features and a logistic regression, no neural network) was trained on two
+  builds and scored on the third. Then the hit-or-miss result for each box was fitted with the standard POD model.
+  <strong>Pick the camera, then move the false-alarm dial</strong> and watch the curve, a90 and a90/95 move with it.</p>
+  <div class="card">
+    <div class="chips" id="sensor-ctl" style="margin-bottom:10px"></div>
+    <p class="small" id="sensor-what"></p>
+    <div class="ctl"><label><div class="hint">False alarms accepted per layer image (windows flagged where the annotator drew nothing)</div><input type="range" id="fc" min="0" max="7" step="1" value="4"><span class="val" id="fc-val"></span></label></div>
+    <div class="viz" id="pod-chart"><div class="tip"></div></div>
+    <div class="stat" id="pod-stat"></div>
+    <div class="tscroll" style="margin-top:14px"><table id="pod-table"></table></div>
+    <p class="note" id="pod-note"></p>
+    <div class="verdict sting"><b>What this says about certifying from process data.</b> <span id="pod-verdict"></span></div>
+  </div>
+</div></section>
+
+<section id="act2"><div class="wrap">
+  <div class="sec-label">Act two &middot; What the coupons prove</div>
+  <h2>How often does a six-coupon rule let a weak build through?</h2>
+  <p class="lede">Penn State published tensile results for <span class="num" id="n-spec"></span> Ti-6Al-4V specimens printed at 42 combinations of laser power and speed (<span class="num n-sets"></span> with a complete record), with the porosity of each measured by X-ray
+  CT. Take the specimens from the parameter sets that pass the console's density gate as the <strong>reference
+  distribution</strong> of a good build. Write the usual rule: print n coupons, accept the build if every one is above a
+  limit set so that a good build passes 95 percent of the time. Then ask the question the rule never answers: if the
+  build is weaker than it should be, how often does it still pass? <strong>Pick the number of coupons.</strong></p>
+  <div class="card">
+    <div class="stat" id="pcrd-stat"></div>
+    <div class="chips" id="n-ctl" style="margin:14px 0 8px"></div>
+    <div class="viz" id="oc-chart"><div class="tip"></div></div>
+    <p class="note" id="oc-note"></p>
+    <div class="verdict sting"><b>The number that decides the rule.</b> <span id="oc-verdict"></span></div>
+  </div>
+  <div class="card">
+    <h3>Density is not strength</h3>
+    <p class="small" style="margin-top:6px">The same <span class="num n-sets"></span> parameter sets: the density the CT scan measured against the strength and
+    the ductility the coupons measured. The console's permanent gate (99.9 percent dense) and the ASTM F2924 minimums for
+    printed Ti-6Al-4V are drawn on. <strong>Pick a property.</strong></p>
+    <div class="chips" id="prop-ctl" style="margin:10px 0"></div>
+    <div class="viz" id="scatter-chart"><div class="tip"></div></div>
+    <p class="note" id="scatter-note"></p>
+  </div>
+</div></section>
+
+<section id="act3"><div class="wrap">
+  <div class="sec-label">Act three &middot; The policy on real windows</div>
+  <h2>The console's four tiers, applied to <span class="num n-sets"></span> real process windows</h2>
+  <p class="lede">The release policy from the console, run on measured numbers: density from CT, the witness result from
+  the actual coupons against the F2924 minimums. Parameter sets are ranked by energy input; the table says which windows
+  would have produced a permanent part, which a temporary one, and which nothing at all, and where density and coupons
+  disagree.</p>
+  <div class="card">
+    <div class="stat" id="pol-stat"></div>
+    <div class="tscroll" style="margin-top:14px"><table id="pol-table"></table></div>
+    <p class="note" id="pol-note"></p>
+    <div class="verdict"><b>What a project developer takes to a partner.</b> <span id="pol-verdict"></span></div>
+  </div>
+</div></section>
+
+<section id="act4"><div class="wrap">
+  <div class="sec-label">Act four &middot; The part that coupons cannot cover</div>
+  <h2>Fatigue life of printed Ti-6Al-4V scatters by a factor of ten at the same stress</h2>
+  <p class="lede">From a published database of additive-manufacturing fatigue tests: every stress-life point for laser
+  powder-bed Ti-6Al-4V it holds, <span class="num" id="n-fat"></span> tests from <span class="num" id="n-fatsets"></span>
+  studies. The spread at a given stress is the reason a handful of coupons can say something about strength and almost
+  nothing about life.</p>
+  <div class="card">
+    <div class="viz" id="sn-chart"><div class="tip"></div></div>
+    <p class="note" id="sn-note"></p>
+    <div class="verdict sting"><b>Why this belongs in a release policy.</b> <span id="sn-verdict"></span></div>
+  </div>
+</div></section>
+
+<section id="coda"><div class="wrap">
+  <div class="sec-label">Context, method, limits</div>
+  <h2>How this was built</h2>
+  <p class="small">All numbers are computed by <code>qualify/analysis.py</code> in the repository from the datasets named
+  below, and the page recomputes the POD fit in the browser whenever the false-alarm dial moves, from the per-flaw
+  detector scores and the reference-window score distribution the script exports. The POD model is the hit/miss logistic
+  model of MIL-HDBK-1823A, POD(a) = logistic(b0 + b1 ln a), with a Wald-type 95 percent lower bound; when a detector
+  catches everything or nothing at a setting, the fit is not shown and a binomial lower bound per size bin is used
+  instead. The acceptance-rule curves assume the reference distribution is normal and that a weak build shifts its mean
+  but not its spread.</p>
+  <div class="limits">
+    <h3 style="font-size:17px;margin-bottom:6px">Limits</h3>
+    <p id="limits-text"></p>
+  </div>
+  <p class="small" style="margin-top:14px">Sources: Yin, Akmal, Salmi and Bj&ouml;rkstrand, annotated image dataset for
+  defect detection in laser powder-bed fusion, Aalto University, Zenodo 14996806 (CC BY 4.0), and the paper in
+  Materials Science in Additive Manufacturing, 2025; Luo, Lu, Simpson and Beese, Ti-6Al-4V process-structure-property
+  dataset, Penn State, Zenodo 6587905 (CC BY 4.0), Additive Manufacturing 2022 and Data in Brief 2023; Zhang and Xu,
+  FatigueData-AM2022, figshare (CC BY 4.0), Scientific Data 2023; MIL-HDBK-1823A, nondestructive evaluation system
+  reliability assessment; ASTM F2924, Ti-6Al-4V powder-bed fusion; the DISCMAM and DILAPRO project pages.</p>
+</div></section>
+
+<footer><div class="wrap"><span>Bolga&ccedil; G&uuml;len &middot; every number on this page is computed from the datasets named above</span><a href="../">back to the console</a></div></footer>
+
+<div id="tour"><div class="wrap">
+  <div class="tk" id="tour-k"></div><div class="tx" id="tour-tx"></div>
+  <div class="nav"><button class="tbtn" id="tour-skip">Close</button><button class="tbtn primary" id="tour-next">Next</button></div>
+</div></div>
+
+<script>
+const D = __DATA__;
+const $ = s => document.querySelector(s);
+const fmt = (n,d) => n == null ? "" : Number(n).toLocaleString("en-GB",{maximumFractionDigits: d==null?1:d});
+const OPS = [0.1, 0.25, 0.5, 1, 3, 5, 10, 20];
+
+/* ---------- charts (shared with the console) ---------- */
+function axes(el, W, H, P, x0, x1, y0, y1, opts){
+  const X=x=>P.l+(opts.logx?(Math.log(x)-Math.log(x0))/(Math.log(x1)-Math.log(x0)):(x-x0)/((x1-x0)||1))*(W-P.l-P.r);
+  const Y=y=>P.t+(1-(y-y0)/((y1-y0)||1))*(H-P.t-P.b);
+  let g="";
+  for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4; g+=`<line x1="${P.l}" x2="${W-P.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)"/><text x="${P.l-7}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${opts.yfmt?opts.yfmt(v):fmt(v,0)}</text>`}
+  const xt=opts.xticks||[0,1,2,3,4].map(i=>x0+(x1-x0)*i/4);
+  xt.forEach(v=>{g+=`<text x="${X(v)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${opts.xfmt?opts.xfmt(v):fmt(v,0)}</text>`});
+  if(opts.xlabel) g+=`<text x="${(P.l+W-P.r)/2}" y="${H+12}" text-anchor="middle" font-size="11" fill="var(--soft)" font-family="var(--mono)">${opts.xlabel}</text>`;
+  return {X,Y,g};
+}
+
+/* ---------- act one: POD ---------- */
+function logfit(sizes, hits){
+  const a=sizes.map(Math.log); const n=a.length; let b0=0,b1=0;
+  for(let it=0;it<200;it++){
+    let g0=1e-4*b0,g1=1e-4*b1,h00=1e-4,h01=0,h11=1e-4;
+    for(let i=0;i<n;i++){const z=b0+b1*a[i]; const p=1/(1+Math.exp(-Math.max(-500,Math.min(500,z)))); const r=p-hits[i]; g0+=r; g1+=r*a[i]; const w=p*(1-p); h00+=w; h01+=w*a[i]; h11+=w*a[i]*a[i];}
+    const det=h00*h11-h01*h01; if(Math.abs(det)<1e-12) break;
+    const d0=(h11*g0-h01*g1)/det, d1=(h00*g1-h01*g0)/det; b0-=d0; b1-=d1; if(Math.abs(d0)<1e-8&&Math.abs(d1)<1e-8) break;
+  }
+  let h00=1e-4,h01=0,h11=1e-4; for(let i=0;i<n;i++){const p=1/(1+Math.exp(-Math.max(-500,Math.min(500,b0+b1*a[i])))); const w=p*(1-p); h00+=w; h01+=w*a[i]; h11+=w*a[i]*a[i];}
+  const det=h00*h11-h01*h01; const c00=h11/det, c01=-h01/det, c11=h00/det;
+  const sig=z=>1/(1+Math.exp(-Math.max(-500,Math.min(500,z))));
+  const pod=x=>sig(b0+b1*Math.log(x));
+  const lower=x=>{const la=Math.log(x); const se=Math.sqrt(Math.max(c00+2*la*c01+la*la*c11,0)); return sig(b0+b1*la-1.645*se)};
+  const solve=(f,t)=>{let lo=Math.exp(Math.min(...a))/8, hi=Math.exp(Math.max(...a))*50; if((f(lo)-t)*(f(hi)-t)>0) return null; for(let k=0;k<80;k++){const m=Math.sqrt(lo*hi); if((f(m)-t)*(f(lo)-t)<=0) hi=m; else lo=m;} return Math.sqrt(lo*hi)};
+  return {b0,b1,pod,lower,a50:solve(pod,0.5),a90:solve(pod,0.9),a9095:solve(lower,0.9)};
+}
+function betaLower(k,n){ // Clopper-Pearson 95% lower bound by bisection on the regularised incomplete beta (small n, crude but exact enough)
+  if(k===0) return 0; const f=p=>{let s=0; for(let j=k;j<=n;j++){s+=Math.exp(lgamma(n+1)-lgamma(j+1)-lgamma(n-j+1)+j*Math.log(p)+(n-j)*Math.log(1-p))} return s};
+  let lo=1e-6,hi=1-1e-6; for(let i=0;i<60;i++){const m=(lo+hi)/2; if(f(m)<0.05) lo=m; else hi=m;} return lo;
+}
+function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5]; let y=x,t=x+5.5; t-=(x+0.5)*Math.log(t); let s=1.000000000190015; for(let j=0;j<6;j++) s+=c[j]/++y; return -t+Math.log(2.5066282746310005*s/x);}
+
+(function(){
+  const sensors=Object.keys(D.pod); let sensor="PB"; let fci=4;
+  $("#sensor-ctl").innerHTML=sensors.map(s=>`<button class="chip" data-s="${s}" aria-pressed="${s===sensor}">${D.pod[s].label}: ${D.pod[s].cls}</button>`).join("");
+  $("#sensor-ctl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;sensor=b.dataset.s;$("#sensor-ctl").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));draw();});
+  $("#fc").addEventListener("input",()=>{fci=+$("#fc").value;draw();});
+  function compute(s, fc){
+    const P=D.pod[s]; const rank=Math.min(P.neg_tail.length-1, Math.max(0, Math.round(fc*P.test_images))); const thr=P.neg_tail[rank]; // the rank-th highest reference score: fc false windows per inspected image
+    const sizes=P.box_scores.map(b=>b[0]), hits=P.box_scores.map(b=>b[1]>thr?1:0); const rate=hits.reduce((a,b)=>a+b,0)/hits.length;
+    const fit=(rate>0.02&&rate<0.98)?logfit(sizes,hits):null;
+    const srt=[...sizes].sort((a,b)=>a-b); const edges=[0,1,2,3,4,5,6,7,8].map(i=>srt[Math.min(srt.length-1,Math.floor(i*(srt.length-1)/8))]);
+    const bins=[]; for(let i=0;i<8;i++){let n=0,k=0,ls=0; for(let j=0;j<sizes.length;j++){const inb=i<7?(sizes[j]>=edges[i]&&sizes[j]<edges[i+1]):(sizes[j]>=edges[i]&&sizes[j]<=edges[i+1]); if(inb){n++;k+=hits[j];ls+=Math.log(sizes[j])}} if(n) bins.push({lo:edges[i],hi:edges[i+1],n,k,hit:k/n,lower:betaLower(k,n),mid:Math.exp(ls/n)})}
+    return {thr,rate,fit,bins,sizes,hits};
+  }
+  function draw(){
+    const P=D.pod[sensor], fc=OPS[fci]; $("#fc-val").textContent=fc+" per layer"; $("#sensor-what").textContent=`What is being detected: ${P.what}. Held-out build: ${P.test_images} inspected layer images, ${P.boxes} boxes; sizes ${fmt(P.size_p10,1)} to ${fmt(P.size_p90,1)} mm (10th to 90th percentile), longest side, ${P.mm_note}.`;
+    const R=compute(sensor,fc);
+    const el=$("#pod-chart"); el.querySelectorAll("svg,.legend").forEach(n=>n.remove());
+    const W=960,H=320,Pd={l:52,r:16,t:14,b:44}; const x0=Math.max(0.5,Math.min(...R.sizes)*0.8), x1=Math.max(...R.sizes)*1.2;
+    const ticks=[1,2,5,10,20,50,100,200].filter(v=>v>=x0&&v<=x1);
+    const A=axes(el,W,H,Pd,x0,x1,0,1,{logx:true,xticks:ticks,xfmt:v=>v+" mm",yfmt:v=>Math.round(100*v)+"%",xlabel:"flaw size, longest side, mm (log scale)"});
+    let g=A.g;
+    g+=`<line x1="${Pd.l}" x2="${W-Pd.r}" y1="${A.Y(0.9)}" y2="${A.Y(0.9)}" stroke="var(--accent)" stroke-dasharray="4 3"/><text x="${Pd.l+4}" y="${A.Y(0.9)-5}" font-size="10.5" fill="var(--accent)" font-family="var(--mono)">90 percent</text>`;
+    if(R.fit){const xs=[]; for(let i=0;i<=80;i++) xs.push(Math.exp(Math.log(x0)+(Math.log(x1)-Math.log(x0))*i/80));
+      g+=`<path d="${xs.map((x,i)=>(i?"L":"M")+A.X(x).toFixed(1)+" "+A.Y(R.fit.lower(x)).toFixed(1)).join(" ")}" fill="none" stroke="var(--neg)" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+      g+=`<path d="${xs.map((x,i)=>(i?"L":"M")+A.X(x).toFixed(1)+" "+A.Y(R.fit.pod(x)).toFixed(1)).join(" ")}" fill="none" stroke="var(--s1)" stroke-width="2.4"/>`;
+      if(R.fit.a9095&&R.fit.a9095<x1) g+=`<line x1="${A.X(R.fit.a9095)}" x2="${A.X(R.fit.a9095)}" y1="${Pd.t}" y2="${H-Pd.b}" stroke="var(--neg)" stroke-dasharray="2 3"/><text x="${A.X(R.fit.a9095)+4}" y="${Pd.t+12}" font-size="10.5" fill="var(--neg)" font-family="var(--mono)">a90/95 = ${fmt(R.fit.a9095,1)} mm</text>`;}
+    R.bins.forEach(b=>{g+=`<line x1="${A.X(b.mid)}" x2="${A.X(b.mid)}" y1="${A.Y(b.lower)}" y2="${A.Y(b.hit)}" stroke="var(--soft)"/><circle cx="${A.X(b.mid)}" cy="${A.Y(b.hit)}" r="${4+Math.min(6,b.n/40)}" fill="var(--ink)"><title>${fmt(b.lo,1)} to ${fmt(b.hi,1)} mm: ${b.k} of ${b.n} caught</title></circle>`});
+    el.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="probability of detection">${g}</svg><div class="legend"><span><i class="dot" style="background:var(--ink)"></i>hit rate per size bin (whisker down to its 95 percent lower bound)</span><span><i style="border-top-color:var(--s1)"></i>fitted POD</span><span><i style="border-top-color:var(--neg);border-top-style:dashed"></i>95 percent lower bound</span></div>`);
+    const f=R.fit;
+    $("#pod-stat").innerHTML=[["flaws caught",Math.round(100*R.rate)+"%",`${R.hits.reduce((a,b)=>a+b,0)} of ${R.hits.length} boxes`],["a50",f&&f.a50?fmt(f.a50,1)+" mm":"n/a","caught half the time"],["a90",f&&f.a90?fmt(f.a90,1)+" mm":"n/a","caught nine times in ten"],["a90/95",f&&f.a9095?fmt(f.a9095,1)+" mm":"n/a","with 95 percent confidence"],["false alarms",fc+" / layer",`threshold ${fmt(R.thr,3)} on ${fmt(P.windows_per_image,0)} windows`]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+    $("#pod-table").innerHTML=`<tr><th class="l">size bin, mm</th><th>flaws</th><th>caught</th><th>hit rate</th><th>95% lower bound</th></tr>`+R.bins.map(b=>`<tr><td class="l num">${fmt(b.lo,1)} to ${fmt(b.hi,1)}</td><td class="num">${b.n}</td><td class="num">${b.k}</td><td class="num">${Math.round(100*b.hit)}%</td><td class="num">${Math.round(100*b.lower)}%</td></tr>`).join("");
+    $("#pod-note").textContent=(f?`Logistic fit b0 = ${fmt(f.b0,2)}, b1 = ${fmt(f.b1,2)} on ln(size). `:`At this setting the detector catches ${R.rate>0.5?"nearly everything":"almost nothing"}, so no curve is fitted; the per-bin lower bounds are the honest statement. `)+`Detector: ${P.features.join(", ")}; trained on ${P.train_images} inspected images from the other two builds. Sizes are box longest sides converted at ${fmt(P.mm_per_px,3)} mm per pixel (${P.mm_note}).`;
+    // verdict across operating points
+    const lo=compute(sensor,OPS[1]), hi=compute(sensor,OPS[6]);
+    $("#pod-verdict").textContent = sensor==="PB"
+      ? `The powder-bed camera is a poor witness for faint streaks: at ${OPS[1]} false alarms per layer it catches ${Math.round(100*lo.rate)} percent of the labelled streaks, at ${OPS[6]} it catches ${Math.round(100*hi.rate)} percent${hi.fit&&hi.fit.a9095?` and reaches a90/95 at ${fmt(hi.fit.a9095,0)} mm`:""}. Ten false alarms per layer over a few thousand layers is tens of thousands of alerts a build, which is the silent-alarm failure the release policy must plan for. A streak the camera does not see is a layer nobody re-inspects.`
+      : `The heat image is a strong witness for overheating: at ${OPS[3]} false alarm per layer it catches ${Math.round(100*compute(sensor,OPS[3]).rate)} percent of the labelled regions${compute(sensor,OPS[3]).fit&&compute(sensor,OPS[3]).fit.a9095?`, with a90/95 at ${fmt(compute(sensor,OPS[3]).fit.a9095,1)} mm`:""}; at ${OPS[1]} it still catches ${Math.round(100*lo.rate)} percent. Overheating of a few millimetres is what this sensor exists for, and here it earns its place in a release policy; what it cannot see is a pore under the surface, which is the CT scan's job.`;
+  }
+  draw();
+  const pb=compute("PB",OPS[4]), ot=compute("OT",OPS[3]);
+  const pbA90=pb.fit&&pb.fit.a90; $("#dek-pb").innerHTML=(pbA90&&pbA90<250)?`a recoater streak longer than <strong>${fmt(pbA90,0)} mm</strong> nine times in ten`:`only <strong>${Math.round(100*pb.rate)} percent</strong> of the recoater streaks, and no streak length on the plate reaches nine in ten`; $("#dek-pbfc").textContent=OPS[4]; $("#dek-ot").textContent=ot.fit&&ot.fit.a90?fmt(ot.fit.a90,1)+" mm":"(no fit)";
+  $("#n-boxes").textContent=fmt(D.pod.PB.boxes+D.pod.OT.boxes,0); $("#n-images").textContent=fmt(D.pod.PB.train_images+D.pod.PB.test_images+D.pod.PB.unlabelled_images+D.pod.OT.train_images+D.pod.OT.test_images+D.pod.OT.unlabelled_images,0);
+})();
+
+/* ---------- act two: coupons ---------- */
+(function(){
+  const C=D.coupons; const p=C.pcrd;
+  $("#n-spec").textContent=C.n_specimens; document.querySelectorAll(".n-sets").forEach(e=>e.textContent=C.n_sets);
+  $("#pcrd-stat").innerHTML=[["reference coupons",p.n,`from ${p.sets} parameter sets at or above 99.9 percent dense`],["strength, mean",fmt(p.uts_mean,0)+" MPa","ultimate tensile strength"],["strength, spread",fmt(p.uts_sd,0)+" MPa","one standard deviation"],["acceptance limit",fmt(C.limit_uts,0)+" MPa",`mean minus ${fmt(C.k,2)} spreads: a good build passes six coupons 95 percent of the time`],["ductility, mean",fmt(p.el_mean,1)+"%","elongation at fracture"]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+  const ns=Object.keys(C.oc); let sel=new Set(["1","6"]);
+  $("#n-ctl").innerHTML=ns.map(n=>`<button class="chip" data-n="${n}" aria-pressed="${sel.has(n)}">${n} coupon${n==="1"?"":"s"}</button>`).join("");
+  $("#n-ctl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const n=b.dataset.n; if(sel.has(n)) sel.delete(n); else sel.add(n); b.setAttribute("aria-pressed",String(sel.has(n)));draw();});
+  const cols={"1":"var(--faint)","2":"var(--s4)","4":"var(--s2)","6":"var(--s1)","12":"var(--s3)"};
+  function draw(){
+    const el=$("#oc-chart"); el.querySelectorAll("svg,.legend").forEach(n=>n.remove());
+    const W=960,H=300,Pd={l:52,r:16,t:14,b:44}; const A=axes(el,W,H,Pd,0,12,0,1,{yfmt:v=>Math.round(100*v)+"%",xfmt:v=>v+"%",xlabel:"how much weaker the build really is (drop in mean strength)"});
+    let g=A.g; g+=`<line x1="${Pd.l}" x2="${W-Pd.r}" y1="${A.Y(0.1)}" y2="${A.Y(0.1)}" stroke="var(--accent)" stroke-dasharray="4 3"/><text x="${W-Pd.r-4}" y="${A.Y(0.1)-5}" text-anchor="end" font-size="10.5" fill="var(--accent)" font-family="var(--mono)">rule catches 90 percent of such builds</text>`;
+    ns.filter(n=>sel.has(n)).forEach(n=>{g+=`<path d="${C.oc[n].map((v,i)=>(i?"L":"M")+A.X(C.shifts[i]).toFixed(1)+" "+A.Y(v).toFixed(1)).join(" ")}" fill="none" stroke="${cols[n]}" stroke-width="2.2"/>`});
+    el.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="operating characteristic">${g}</svg><div class="legend">${ns.filter(n=>sel.has(n)).map(n=>`<span><i style="border-top-color:${cols[n]}"></i>${n} coupon${n==="1"?"":"s"}: probability the build is accepted</span>`).join("")}</div>`);
+    const six=C.oc["6"], i5=C.shifts.findIndex(s=>s>=5);
+    $("#oc-note").textContent=`Every rule uses the same limit, ${fmt(C.limit_uts,0)} MPa, so that a good build passes six coupons 95 percent of the time. To catch a 3 percent strength drop nine times in ten this rule needs ${C.need["3"]??"more than 60"} coupons; a 5 percent drop, ${C.need["5"]??"more than 60"}; an 8 percent drop, ${C.need["8"]??"more than 60"}.`;
+    $("#oc-verdict").textContent=`Six coupons accept a build that is 5 percent weaker than it should be ${Math.round(100*six[i5])} percent of the time. The rule is not wrong; it is a rule about gross failure, and the spread of good builds (${fmt(p.uts_sd,0)} MPa on ${fmt(p.uts_mean,0)}) sets what it can see. A release policy that promises more than that from coupons alone is promising what the arithmetic does not allow, and that is the case for process data: not because the camera is better, but because it looks at every layer instead of six bars.`;
+    $("#dek-drop").textContent="5"; $("#dek-catch").textContent=Math.round(100*(1-six[i5]))+" percent";
+  }
+  draw();
+  // scatter
+  let prop="uts";
+  const PROPS={uts:["ultimate tensile strength, MPa",C.f2924.uts],el:["elongation at fracture, percent",C.f2924.el],ys:["yield strength, MPa",C.f2924.ys]};
+  $("#prop-ctl").innerHTML=Object.entries(PROPS).map(([k,v])=>`<button class="chip" data-p="${k}" aria-pressed="${k===prop}">${v[0].split(",")[0]}</button>`).join("");
+  $("#prop-ctl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;prop=b.dataset.p;$("#prop-ctl").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));sc();});
+  function sc(){
+    const el=$("#scatter-chart"); el.querySelectorAll("svg,.legend").forEach(n=>n.remove());
+    const rows=C.scatter; const ys=rows.map(r=>r[prop]); const y0=Math.min(...ys, PROPS[prop][1])*0.95, y1=Math.max(...ys)*1.04;
+    const W=960,H=320,Pd={l:52,r:16,t:14,b:44}; const A=axes(el,W,H,Pd,0.005,20,y0,y1,{logx:true,xticks:[0.01,0.1,1,10],xfmt:v=>v+"%",yfmt:v=>fmt(v,0),xlabel:"porosity by X-ray CT, percent (log scale); the console's permanent gate is 0.1 percent"});
+    let g=A.g; g+=`<line x1="${A.X(0.1)}" x2="${A.X(0.1)}" y1="${Pd.t}" y2="${H-Pd.b}" stroke="var(--accent)" stroke-dasharray="4 3"/><text x="${A.X(0.1)-4}" y="${Pd.t+12}" text-anchor="end" font-size="10.5" fill="var(--accent)" font-family="var(--mono)">99.9 percent dense</text>`;
+    g+=`<line x1="${Pd.l}" x2="${W-Pd.r}" y1="${A.Y(PROPS[prop][1])}" y2="${A.Y(PROPS[prop][1])}" stroke="var(--neg)" stroke-dasharray="4 3"/><text x="${W-Pd.r-4}" y="${A.Y(PROPS[prop][1])-5}" text-anchor="end" font-size="10.5" fill="var(--neg)" font-family="var(--mono)">ASTM F2924 minimum ${PROPS[prop][1]}</text>`;
+    rows.forEach(r=>{g+=`<circle cx="${A.X(Math.max(0.005,r.porosity))}" cy="${A.Y(r[prop])}" r="6" fill="var(--s1)" fill-opacity=".8" stroke="#fff"><title>set ${r.set}: ${r.power} W, ${r.speed} mm/s, porosity ${fmt(r.porosity,3)}%, ${PROPS[prop][0].split(",")[0]} ${fmt(r[prop],1)}</title></circle>`});
+    el.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="property against porosity">${g}</svg>`);
+    const dense=rows.filter(r=>r.porosity<=0.1), porous=rows.filter(r=>r.porosity>0.1);
+    const fails=dense.filter(r=>r[prop]<PROPS[prop][1]).length, passes=porous.filter(r=>r[prop]>=PROPS[prop][1]).length;
+    $("#scatter-note").textContent=`${dense.length} of ${rows.length} parameter sets pass the density gate; ${fails} of those still fall under the F2924 minimum for ${PROPS[prop][0].split(",")[0]}, and ${passes} of the ${porous.length} that fail the gate still meet it. Correlation of log porosity with strength ${fmt(C.corr_log_porosity_uts,2)}, with ductility ${fmt(C.corr_log_porosity_el,2)}: pores cost ductility first.`;
+  }
+  sc();
+})();
+
+/* ---------- act three: policy ---------- */
+(function(){
+  const P=D.policy; const rows=[...P.rows].sort((a,b)=>a.led-b.led);
+  const c=P.counts;
+  $("#pol-stat").innerHTML=[["permanent",c.permanent||0,"dense and every coupon above F2924"],["temporary",c.temporary||0,"99.5 to 99.9 percent dense, coupons pass"],["emergency only",c["emergency only"]||0,"at least 99 percent dense"],["scrap",c.scrap||0,"below 99 percent dense"],["density and coupons disagree",(P.dense_but_witness_fail.length+P.porous_but_witness_pass.length),`${P.dense_but_witness_fail.length} dense but failing, ${P.porous_but_witness_pass.length} porous but passing`]].map(([k,n,s])=>`<div><div class="k">${k}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+  $("#pol-table").innerHTML=`<tr><th class="l">set</th><th>power W</th><th>speed mm/s</th><th>energy J/m</th><th>density %</th><th class="l">coupons</th><th>lowest UTS</th><th>lowest elongation</th><th class="l">tier</th></tr>`+rows.map(r=>`<tr><td class="l">${r.set}</td><td class="num">${r.power}</td><td class="num">${r.speed}</td><td class="num">${fmt(r.led,0)}</td><td class="num ${r.density>=99.9?"pos":r.density<99?"neg":"amb"}">${fmt(r.density,2)}</td><td class="l">${r.witness} (${r.coupons})</td><td class="num">${fmt(r.uts_min,0)}</td><td class="num">${fmt(r.el_min,1)}%</td><td class="l"><b class="${r.tier==="permanent"?"pos":r.tier==="scrap"?"":"amb"}">${r.tier}</b></td></tr>`).join("");
+  $("#pol-note").textContent=`Energy input is the linear energy density, power over speed. A "pass" means every coupon of the set met UTS 895, yield 825 and elongation 10 percent; one coupon under any minimum fails the set. Deviation and surface finish, which the console's policy also asks for, are not in this dataset and are taken as within tolerance.`;
+  $("#pol-verdict").textContent=`${c.permanent||0} of ${rows.length} process windows would release a permanent part under this policy, and the disagreements are the point: ${P.dense_but_witness_fail.length?`sets ${P.dense_but_witness_fail.join(", ")} pass the density gate and still fail a coupon, so density alone would have released a part the coupons reject`:"no dense set fails its coupons"}; ${P.porous_but_witness_pass.length?`sets ${P.porous_but_witness_pass.join(", ")} miss the gate and pass every coupon, so the gate alone would have scrapped parts the coupons accept`:"no porous set passes its coupons"}. A release policy needs both witnesses, and a project proposal should say which one pays for what.`;
+})();
+
+/* ---------- act four: fatigue ---------- */
+(function(){
+  const F=D.fatigue; if(!F){$("#sn-note").textContent="fatigue chapter not available";return;}
+  $("#n-fat").textContent=fmt(F.points,0); $("#n-fatsets").textContent=F.datasets;
+  const el=$("#sn-chart"); const pts=F.sample.filter(p=>p[0]>0&&p[1]>0);
+  const W=960,H=320,Pd={l:52,r:16,t:14,b:44}; const x0=1e3,x1=1e8, ys=pts.map(p=>p[1]); const y0=0,y1=Math.max(...ys)*1.05;
+  const A=axes(el,W,H,Pd,x0,x1,y0,y1,{logx:true,xticks:[1e3,1e4,1e5,1e6,1e7,1e8],xfmt:v=>"10^"+Math.round(Math.log10(v)),yfmt:v=>fmt(v,0),xlabel:"cycles to failure (log scale); open marks are runouts, the test stopped before failure"});
+  let g=A.g; pts.forEach(p=>{const x=Math.min(x1,Math.max(x0,p[0])); g+=`<circle cx="${A.X(x)}" cy="${A.Y(p[1])}" r="3" fill="${p[2]?"none":"var(--s1)"}" stroke="var(--s1)" fill-opacity=".55"/>`});
+  el.insertAdjacentHTML("beforeend",`<svg viewBox="0 0 ${W} ${H+16}" role="img" aria-label="stress against life">${g}</svg>`);
+  const b=F.bins.filter(x=>x.n>=10); const worst=b.reduce((a,x)=>x.log_life_sd>a.log_life_sd?x:a,b[0]||{log_life_sd:0});
+  $("#sn-note").textContent=`Stress amplitude in MPa against cycles to failure. In stress bands with at least ten tests, the standard deviation of log10(life) runs from ${fmt(Math.min(...b.map(x=>x.log_life_sd)),2)} to ${fmt(Math.max(...b.map(x=>x.log_life_sd)),2)} decades${worst.n?` (widest band ${fmt(worst.lo,0)} to ${fmt(worst.hi,0)} MPa, ${worst.n} tests)`:""}; one decade of scatter is a factor of ten in life. ${F.runouts} of the ${F.points} tests are runouts. Studies differ in surface finish, heat treatment and build direction, and the database mixes them; the scatter is partly that, and partly the pores.`;
+  $("#sn-verdict").textContent=`A factor of ten in fatigue life at the same stress cannot be qualified by six coupons, or by sixty. It is qualified by controlling the process that makes the pores and by knowing the surface, which is why NASA's standard asks for foundational process control before any part is accepted, and why a field release policy should say "permanent" only for parts whose life is not the limiting case. Camera, coupons, CT and a fatigue argument are four different witnesses; the release tier should name which ones testified.`;
+})();
+
+/* ---------- limits ---------- */
+$("#limits-text").textContent=`The detector is deliberately simple; a trained network would catch more at the same false-alarm rate, and the curves here are a floor, not the sensor's ceiling. Unlabelled images were left aside rather than treated as clean, and windows away from the boxes in inspected images are the clean reference, which assumes the annotators found everything they drew nothing around. Box sizes are converted to millimetres with an estimated plate scale, not a calibration. The coupon chapter uses one machine, one alloy and one laboratory, and treats a weak build as a shift of the mean only. The policy chapter has no dimensional or surface data and takes those as passing. The fatigue chapter mixes studies with different surface conditions and heat treatments on purpose, to show the spread a release policy inherits from the literature. Nothing here is a certification claim; it is the arithmetic a certification claim would have to survive.`;
+
+/* ---------- walkthrough ---------- */
+const TOUR=[
+ ["Start here","The console's release decision took the measurements as given. This chapter measures the witnesses themselves, on open data. <b>Read the first paragraph</b> for the three numbers."],
+ ["Five things to know","Two cameras, two flaw types, and the two ideas everything rests on: probability of detection with its false-alarm dial, and how often an acceptance rule lets a weak build through."],
+ ["Their words","The centre director, the DILAPRO and DISCMAM projects, and the sentence the whole field keeps quoting."],
+ ["Act one","<b>Pick a camera, move the false-alarm dial.</b> Each dot is a size bin of labelled flaws from the held-out build; the curve is the fitted POD, the dashed line its 95 percent lower bound."],
+ ["Act two","<b>Pick the number of coupons.</b> The curve says how often the rule accepts a build that is weaker than it should be. Then the scatter: density against strength, with both gates drawn."],
+ ["Act three","The console's four tiers applied to 42 real process windows, and the sets where the density gate and the coupons disagree."],
+ ["Act four","Fatigue life of printed titanium at the same stress, from a published database: the spread no coupon rule can cover."],
+ ["Then","Method, sources, limits."]
+];
+const ANCH=["header","#primer","#words","#act1","#act2","#act3","#act4","#coda"];
+const tour={i:0,open(i){this.i=i;$("#tour").classList.add("on");this.render(true)},close(){$("#tour").classList.remove("on");try{localStorage.setItem("rtp-q-tour","seen")}catch(e){}},
+  render(sc){const [k,t]=TOUR[this.i];$("#tour-k").textContent=`${this.i+1} of ${TOUR.length} · ${k}`;$("#tour-tx").innerHTML=t;$("#tour-next").textContent=this.i===TOUR.length-1?"Done":"Next";
+    if(sc){const el=document.querySelector(ANCH[this.i]); if(el) window.scrollTo({top:Math.max(0,el.getBoundingClientRect().top+window.scrollY-16),behavior:"smooth"});}},
+  next(){if(this.i>=TOUR.length-1){this.close();return} this.i++;this.render(true)}};
+$("#tour-next").addEventListener("click",()=>tour.next());$("#tour-skip").addEventListener("click",()=>tour.close());$("#tourbtn").addEventListener("click",()=>tour.open(0));
+if(!location.search.includes("tour=off")){try{if(localStorage.getItem("rtp-q-tour")!=="seen")setTimeout(()=>tour.open(0),600)}catch(e){setTimeout(()=>tour.open(0),600)}}
+</script>
+</body>
+</html>
