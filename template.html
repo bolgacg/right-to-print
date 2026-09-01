@@ -99,6 +99,8 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .tour-open:hover{background:var(--accent);color:#fff}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.reset-btn{justify-self:start;align-self:end;font-family:var(--mono);font-size:11.5px;padding:6px 12px;border:1px solid var(--rule2);border-radius:4px;background:var(--card);color:var(--soft);cursor:pointer;width:max-content}
+.reset-btn:hover{border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -173,8 +175,10 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
   next to each criterion so they can be argued with. <strong>Click any dot</strong> to read its scorecard, what single change of
   fact would flip its verdict, and what to ask the supplier before paying for a print right.</p>
   <div class="card">
-    <div class="chips" id="plat-ctl" style="margin-bottom:8px"></div>
+    <div id="t-quad">
+<div class="chips" id="plat-ctl" style="margin-bottom:8px"></div>
     <div class="viz" id="quad"><div class="tip"></div></div>
+    </div>
     <div class="stat" id="quad-stat"></div>
     <div id="scorecard" style="margin-top:18px"></div>
     <div class="verdict sting"><b>What the screening shows.</b> The catalogue is synthetic, the rules are public, and
@@ -193,10 +197,12 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
     for each way of standing the part on the plate. <strong>Pick a design.</strong> Each is computed here, by the classic
     density method with Langelaar's printability filter, and each is scored for how much of it would need support in every
     build direction.</p>
-    <div class="chips" id="topo-ctl" style="margin:10px 0"></div>
+    <div id="t-topo">
+<div class="chips" id="topo-ctl" style="margin:10px 0"></div>
     <div class="two">
       <div><canvas class="topo" id="topo-canvas" width="120" height="60"></canvas><p class="note" id="topo-cap"></p></div>
       <div><div class="tscroll"><table id="topo-table"></table></div><p class="note" id="topo-note"></p></div>
+    </div>
     </div>
     <div class="verdict"><b>What the printer's rule does to the design.</b> <span id="topo-verdict"></span></div>
     <p class="note" style="margin-top:12px">Whether the printed part comes out the shape it was drawn is the other half of the design consequence. <a href="distort/">Chapter three</a> calibrates a distortion model to NIST's AM-Bench bridge and shows what compensation buys, and what a model error costs.</p>
@@ -212,7 +218,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
   the fleet's remaining life and discounted, minus the one-off cost of qualifying the part family, that is what a
   <strong>print right is worth</strong>. If it is worth less than nothing, buy the part.</p>
   <div class="card">
-    <div class="ctl">
+    <div class="ctl" id="t-eco">
       <label><div class="hint">A stopped platform costs, per day (criticality 1; criticality 2 counts 40 percent, 3 nothing)</div><input type="range" id="s-down" min="0" max="5000" step="100"><span class="val" id="v-down"></span></label>
       <label><div class="hint">Chance the part is not on the shelf when it fails</div><input type="range" id="s-stock" min="0" max="1" step="0.05"><span class="val" id="v-stock"></span></label>
       <label><div class="hint">Fleet size (the catalogue's demand is per hundred platforms)</div><input type="range" id="s-fleet" min="10" max="200" step="10"><span class="val" id="v-fleet"></span></label>
@@ -239,6 +245,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
   at the home centre and shipped back. <strong>Set the fleet, the printers and the powder, then run it.</strong> The line is the
   share of the fleet that is operational each day.</p>
   <div class="card">
+<div id="t-ready">
     <div class="ctl">
       <label><div class="hint">Platforms in the fleet</div><input type="range" id="r-fleet" min="10" max="200" step="10"><span class="val" id="rv-fleet"></span></label>
       <label><div class="hint">Printers in the container</div><input type="range" id="r-print" min="1" max="3" step="1"><span class="val" id="rv-print"></span></label>
@@ -246,6 +253,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
       <label><div class="hint">Random seed (a different draw of failures)</div><input type="range" id="r-seed" min="1" max="20" step="1"><span class="val" id="rv-seed"></span></label>
     </div>
     <div class="viz" id="ready-chart"><div class="tip"></div></div>
+    </div>
     <div class="stat" id="ready-stat"></div>
     <h3 style="margin-top:22px;font-size:17px">Where one container stops keeping up</h3>
     <p class="small">The same simulation at the default settings, swept over fleet size. The gap between the container line and the
@@ -429,7 +437,7 @@ let selected = null, platFilter = "all";
 /* ---------- act two: economics ---------- */
 const ECO = {downtimeEurDay:M.defaults.downtimeEurDay, pStockout:M.defaults.pStockout, fleet:M.defaults.fleet, fleetYears:M.defaults.fleetYears, container:true, machineEurH:rules.assumptions.machine_eur_h, powderFactor:1};
 (function(){
-  const bind=(id,key,vid,f)=>{const el=$(id); el.value=ECO[key]; const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{ECO[key]=+el.value;show();draw();});};
+  const bind=(id,key,vid,f)=>{const el=$(id); el.value=ECO[key]; el.dataset.def=String(el.value); const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{ECO[key]=+el.value;show();draw();});};
   bind("#s-down","downtimeEurDay","#v-down",v=>fmt(v,0)+" EUR"); bind("#s-stock","pStockout","#v-stock",v=>Math.round(v*100)+"%"); bind("#s-fleet","fleet","#v-fleet",v=>v+" platforms");
   bind("#s-years","fleetYears","#v-years",v=>v+" years"); bind("#s-mach","machineEurH","#v-mach",v=>v+" EUR/h"); bind("#s-powder","powderFactor","#v-powder",v=>"x"+v);
   function draw(){
@@ -452,7 +460,7 @@ const ECO = {downtimeEurDay:M.defaults.downtimeEurDay, pStockout:M.defaults.pSto
 /* ---------- act three: readiness ---------- */
 const RS = {fleet:M.defaults.fleet, printers:M.defaults.printers, powderKg:M.defaults.powderKg, pStockout:M.defaults.pStockout, days:M.defaults.days, seed:M.defaults.seed, reachbackDays:M.defaults.reachbackDays, downtimeEurDay:M.defaults.downtimeEurDay, fleetYears:M.defaults.fleetYears, container:true};
 (function(){
-  const bind=(id,key,vid,f)=>{const el=$(id); el.value=RS[key]; const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{RS[key]=+el.value;show();draw();});};
+  const bind=(id,key,vid,f)=>{const el=$(id); el.value=RS[key]; el.dataset.def=String(el.value); const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{RS[key]=+el.value;show();draw();});};
   bind("#r-fleet","fleet","#rv-fleet",v=>v); bind("#r-print","printers","#rv-print",v=>v); bind("#r-powder","powderKg","#rv-powder",v=>v+" kg"); bind("#r-seed","seed","#rv-seed",v=>v);
   const ecoRows=()=>parts.map(p=>({part:p, eco:RTP.economics(p,rules,Object.assign({},RS,{fleet:RS.fleet}))}));
   function draw(){
@@ -474,7 +482,7 @@ const RS = {fleet:M.defaults.fleet, printers:M.defaults.printers, powderKg:M.def
 /* ---------- acceptance tier ---------- */
 const TI={density:99.93,deviation:0.8,witness:"pass",tolerance:"fine",machined:true,criticality:1,mission:"routine"};
 (function(){
-  const bind=(id,key,vid,f)=>{const el=$(id); el.value=TI[key]; const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{TI[key]=+el.value;show();draw();});};
+  const bind=(id,key,vid,f)=>{const el=$(id); el.value=TI[key]; el.dataset.def=String(el.value); const show=()=>{$(vid).textContent=f(el.value)}; show(); el.addEventListener("input",()=>{TI[key]=+el.value;show();draw();});};
   bind("#t-dens","density","#tv-dens",v=>fmt(v,2)+"%"); bind("#t-dev","deviation","#tv-dev",v=>"x"+fmt(v,1));
   const chips=(id,key,opts,val)=>{const el=$(id); el.innerHTML=opts.map(o=>`<button class="chip" data-v="${o[0]}" aria-pressed="${String(o[0])===String(TI[key])}">${o[1]}</button>`).join(""); el.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;TI[key]=val?val(b.dataset.v):b.dataset.v;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));draw();});};
   chips("#t-wit","witness",[["pass","passed"],["none","none printed"],["fail","failed"]]); chips("#t-tol","tolerance",[["coarse","coarse"],["medium","medium"],["fine","fine"]]);
@@ -499,6 +507,12 @@ const TI={density:99.93,deviation:0.8,witness:"pass",tolerance:"fine",machined:t
   $("#assump-table").innerHTML=`<tr><th class="l">item</th><th class="l">value</th><th class="l">kind</th><th class="l">source or note</th></tr>`+rows.map(r=>`<tr><td class="l">${r[0]}</td><td class="l num" style="font-size:12.5px">${r[1]}</td><td class="l"><span class="pill ${r[2].startsWith("fact")?"ok":"mid"}">${r[2]}</span></td><td class="l small">${r[3]}</td></tr>`).join("");
 })();
 
+/* ---------- reset buttons for slider groups ---------- */
+document.querySelectorAll(".ctl").forEach(c=>{ const rs=c.querySelectorAll('input[type="range"]'); if(rs.length>=4){
+  const b=document.createElement("button"); b.type="button"; b.className="reset-btn"; b.textContent="reset to defaults";
+  b.addEventListener("click",()=>{ rs.forEach(el=>{ if(el.dataset.def!==undefined){ el.value=el.dataset.def; el.dispatchEvent(new Event("input")); } }); });
+  c.appendChild(b); }});
+
 /* ---------- walkthrough ---------- */
 const TOUR=[
  ["Start here","This console answers four questions a sustainment desk asks about printing spare parts. <b>Read the first paragraph:</b> most parts should not be printed, and printing never wins on price here."],
@@ -510,7 +524,7 @@ const TOUR=[
  ["Act three","<b>Set the fleet, printers and powder.</b> A ninety-day simulation of readiness with and without a container; then the sweep that shows where one container stops keeping up, and the release decision with its four tiers."],
  ["Then","Method, the assumptions table with a fact-or-assumption pill on every row, and the limits, which are real."]
 ];
-const ANCH=["header","#primer","#words","#act1","#topo-ctl","#act2","#act3","#coda"];
+const ANCH=["header",".primer","#words","#t-quad","#t-topo","#t-eco","#t-ready","#assump-table"];
 const TOURKEY="rtp-tour-v2";
 const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length}`, html:t[1]}));
 (function(){
@@ -518,24 +532,26 @@ const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function place(){
     const st=STEPS[idx]; const elm=document.querySelector(st.sel); if(!elm){next();return;}
-    elm.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
-    setTimeout(()=>{
-      const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
-      root.style.height=document.documentElement.scrollHeight+'px';
-      const cw=Math.min(400, innerWidth-32), ch=250;
-      const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
-      // the highlight never has the card on top of it: the card goes to the right when there is room,
-      // otherwise the highlight is shortened to leave room for the card below it, inside the viewport
-      const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - r.top - ch - 40));
-      hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
-      const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
-      card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
-      let cx, cy;
-      if(fitsRight){ cx=r.left+sx+r.width+18; cy=r.top+sy; }
-      else { cx=Math.min(r.left+sx, sx+innerWidth-16-cw); cy=r.top+sy+hh+22; }
-      card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(sy+16,cy)+'px';
-      $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
-    }, reduced?50:450);
+    // geometry in document coordinates, so it does not depend on how far a smooth scroll has got
+    const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
+    const docTop=r.top+sy, docLeft=r.left+sx;
+    root.style.height=document.documentElement.scrollHeight+'px';
+    const maxScroll=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const target=Math.max(0,Math.min(docTop-14, maxScroll)), vTop=docTop-target;
+    const cw=Math.min(400, innerWidth-32), ch=250;
+    const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
+    // the card never covers the highlight: right of it when there is room, otherwise the
+    // highlight is shortened to leave room for the card below it, inside the viewport
+    const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - vTop - ch - 40));
+    hl.style.left=(docLeft-8)+'px'; hl.style.top=(docTop-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
+    const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
+    card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
+    let cx, cy;
+    if(fitsRight){ cx=docLeft+r.width+18; cy=docTop; }
+    else { cx=Math.min(docLeft, sx+innerWidth-16-cw); cy=docTop+hh+22; }
+    card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(target+16,cy)+'px';
+    $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
+    window.scrollTo({top:target, behavior:reduced?'auto':'smooth'});
   }
   function next(){ if(idx>=STEPS.length-1){stop();return;} idx++; place(); }
   function stop(){ root.classList.remove('on'); try{localStorage.setItem(TOURKEY,'seen')}catch(e){} }

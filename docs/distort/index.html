@@ -170,8 +170,10 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
   the plate, as it did in the benchmark. <strong>Cut the legs one by one</strong> and watch the profile: the spring is not
   released by the first cut, or the fifth.</p>
   <div class="card">
-    <div class="ctl"><label><div class="hint">Legs cut free, from the ridge-1 end</div><input type="range" id="ncut" min="1" max="12" step="1" value="12"><span class="val" id="ncut-val"></span></label></div>
+    <div id="t-cut">
+<div class="ctl"><label><div class="hint">Legs cut free, from the ridge-1 end</div><input type="range" id="ncut" min="1" max="12" step="1" value="12"><span class="val" id="ncut-val"></span></label></div>
     <div class="viz" id="profile-chart"><div class="tip"></div></div>
+    </div>
     <div class="stat" id="profile-stat"></div>
     <p class="note" id="profile-note"></p>
     <div class="verdict"><b>What the profile says.</b> <span id="profile-verdict"></span></div>
@@ -186,8 +188,10 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
   The question that matters is what happens when the model is wrong by a plausible amount, which the 2018 blind round
   says it will be. <strong>Move the model error</strong> and read the residual.</p>
   <div class="card">
-    <div class="ctl"><label><div class="hint">The real inherent strain relative to the calibrated one (the blind submissions in 2018 missed by about this much either way)</div><input type="range" id="err" min="-40" max="40" step="5" value="20"><span class="val" id="err-val"></span></label></div>
+    <div id="t-comp">
+<div class="ctl"><label><div class="hint">The real inherent strain relative to the calibrated one (the blind submissions in 2018 missed by about this much either way)</div><input type="range" id="err" min="-40" max="40" step="5" value="20"><span class="val" id="err-val"></span></label></div>
     <div class="viz" id="comp-chart"><div class="tip"></div></div>
+    </div>
     <div class="stat" id="comp-stat"></div>
     <div class="verdict sting"><b>What compensation buys when the model is wrong.</b> <span id="comp-verdict"></span></div>
   </div>
@@ -292,7 +296,7 @@ const TOUR=[
  ["Act two","<b>Move the model error.</b> Compensation is exact in the model; what comes out of the machine is the model's error times the spring."],
  ["Then","Method, sources, limits: one calibrated scalar, two dimensions, no plasticity."]
 ];
-const ANCH=["header","#primer","#act1","#act2","#coda"];
+const ANCH=["header",".primer","#t-cut","#t-comp","#coda"];
 const TOURKEY="rtp-d-tour-v2";
 const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length}`, html:t[1]}));
 (function(){
@@ -300,24 +304,26 @@ const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function place(){
     const st=STEPS[idx]; const elm=document.querySelector(st.sel); if(!elm){next();return;}
-    elm.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
-    setTimeout(()=>{
-      const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
-      root.style.height=document.documentElement.scrollHeight+'px';
-      const cw=Math.min(400, innerWidth-32), ch=250;
-      const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
-      // the highlight never has the card on top of it: the card goes to the right when there is room,
-      // otherwise the highlight is shortened to leave room for the card below it, inside the viewport
-      const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - r.top - ch - 40));
-      hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
-      const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
-      card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
-      let cx, cy;
-      if(fitsRight){ cx=r.left+sx+r.width+18; cy=r.top+sy; }
-      else { cx=Math.min(r.left+sx, sx+innerWidth-16-cw); cy=r.top+sy+hh+22; }
-      card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(sy+16,cy)+'px';
-      $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
-    }, reduced?50:450);
+    // geometry in document coordinates, so it does not depend on how far a smooth scroll has got
+    const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
+    const docTop=r.top+sy, docLeft=r.left+sx;
+    root.style.height=document.documentElement.scrollHeight+'px';
+    const maxScroll=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const target=Math.max(0,Math.min(docTop-14, maxScroll)), vTop=docTop-target;
+    const cw=Math.min(400, innerWidth-32), ch=250;
+    const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
+    // the card never covers the highlight: right of it when there is room, otherwise the
+    // highlight is shortened to leave room for the card below it, inside the viewport
+    const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - vTop - ch - 40));
+    hl.style.left=(docLeft-8)+'px'; hl.style.top=(docTop-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
+    const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
+    card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
+    let cx, cy;
+    if(fitsRight){ cx=docLeft+r.width+18; cy=docTop; }
+    else { cx=Math.min(docLeft, sx+innerWidth-16-cw); cy=docTop+hh+22; }
+    card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(target+16,cy)+'px';
+    $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
+    window.scrollTo({top:target, behavior:reduced?'auto':'smooth'});
   }
   function next(){ if(idx>=STEPS.length-1){stop();return;} idx++; place(); }
   function stop(){ root.classList.remove('on'); try{localStorage.setItem(TOURKEY,'seen')}catch(e){} }

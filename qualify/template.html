@@ -25,7 +25,8 @@ __CSS__
   know their strengths is guessing. Three measured answers: a layer camera on an EOS M290 catches <span id="dek-pb"></span>, at <span id="dek-pbfc"></span> false alarms per
   layer; an overheating spot in the heat image is caught above <strong><span id="dek-ot"></span></strong> at
   one false alarm per layer; and an acceptance rule of six tensile coupons catches a <span id="dek-drop"></span> percent
-  drop in strength only <strong><span id="dek-catc which is the arithmetic behind the industry's complaint that printing stalls in qualification.</p>
+  drop in strength only <strong><span id="dek-catch"></span></strong> of the time, which is the arithmetic behind the
+  industry's complaint that printing stalls in qualification.</p>
   <div class="byline"><span>Bolga&ccedil; G&uuml;len &middot; Odense, 2026</span><span>&middot;</span><a href="https://github.com/bolgacg/right-to-print">source and data</a>
     <button class="tour-open" id="tourbtn">Walk me through it</button></div>
 </div></header>
@@ -82,10 +83,12 @@ __CSS__
   builds and scored on the third. Then the hit-or-miss result for each box was fitted with the standard POD model.
   <strong>Pick the camera, then move the false-alarm dial</strong> and watch the curve, a90 and a90/95 move with it.</p>
   <div class="card">
-    <div class="chips" id="sensor-ctl" style="margin-bottom:10px"></div>
+    <div id="t-pod">
+<div class="chips" id="sensor-ctl" style="margin-bottom:10px"></div>
     <p class="small" id="sensor-what"></p>
     <div class="ctl"><label><div class="hint">False alarms accepted per layer image (windows flagged where the annotator drew nothing)</div><input type="range" id="fc" min="0" max="7" step="1" value="4"><span class="val" id="fc-val"></span></label></div>
     <div class="viz" id="pod-chart"><div class="tip"></div></div>
+    </div>
     <div class="stat" id="pod-stat"></div>
     <div class="tscroll" style="margin-top:14px"><table id="pod-table"></table></div>
     <p class="note" id="pod-note"></p>
@@ -103,8 +106,10 @@ __CSS__
   build is weaker than it should be, how often does it still pass? <strong>Pick the number of coupons.</strong></p>
   <div class="card">
     <div class="stat" id="pcrd-stat"></div>
-    <div class="chips" id="n-ctl" style="margin:14px 0 8px"></div>
+    <div id="t-oc">
+<div class="chips" id="n-ctl" style="margin:14px 0 8px"></div>
     <div class="viz" id="oc-chart"><div class="tip"></div></div>
+    </div>
     <p class="note" id="oc-note"></p>
     <div class="verdict sting"><b>How often the rule lets a weak build through.</b> <span id="oc-verdict"></span></div>
   </div>
@@ -338,7 +343,7 @@ const TOUR=[
  ["Act four","Fatigue life of printed titanium at the same stress, from a published database: the spread no coupon rule can cover."],
  ["Then","Method, sources, limits."]
 ];
-const ANCH=["header","#primer","#words","#act1","#act2","#act3","#act4","#coda"];
+const ANCH=["header",".primer","#words","#t-pod","#t-oc","#pol-stat","#sn-chart","#coda"];
 const TOURKEY="rtp-q-tour-v2";
 const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length}`, html:t[1]}));
 (function(){
@@ -346,24 +351,26 @@ const STEPS=TOUR.map((t,i)=>({sel:ANCH[i], k:`${t[0]} · ${i+1} of ${TOUR.length
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function place(){
     const st=STEPS[idx]; const elm=document.querySelector(st.sel); if(!elm){next();return;}
-    elm.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
-    setTimeout(()=>{
-      const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
-      root.style.height=document.documentElement.scrollHeight+'px';
-      const cw=Math.min(400, innerWidth-32), ch=250;
-      const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
-      // the highlight never has the card on top of it: the card goes to the right when there is room,
-      // otherwise the highlight is shortened to leave room for the card below it, inside the viewport
-      const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - r.top - ch - 40));
-      hl.style.left=(r.left+sx-8)+'px'; hl.style.top=(r.top+sy-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
-      const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
-      card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
-      let cx, cy;
-      if(fitsRight){ cx=r.left+sx+r.width+18; cy=r.top+sy; }
-      else { cx=Math.min(r.left+sx, sx+innerWidth-16-cw); cy=r.top+sy+hh+22; }
-      card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(sy+16,cy)+'px';
-      $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
-    }, reduced?50:450);
+    // geometry in document coordinates, so it does not depend on how far a smooth scroll has got
+    const r=elm.getBoundingClientRect(), sx=window.scrollX, sy=window.scrollY;
+    const docTop=r.top+sy, docLeft=r.left+sx;
+    root.style.height=document.documentElement.scrollHeight+'px';
+    const maxScroll=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const target=Math.max(0,Math.min(docTop-14, maxScroll)), vTop=docTop-target;
+    const cw=Math.min(400, innerWidth-32), ch=250;
+    const fitsRight = r.left+r.width+18+cw <= innerWidth-16;
+    // the card never covers the highlight: right of it when there is room, otherwise the
+    // highlight is shortened to leave room for the card below it, inside the viewport
+    const hh = fitsRight ? r.height : Math.max(120, Math.min(r.height, innerHeight - vTop - ch - 40));
+    hl.style.left=(docLeft-8)+'px'; hl.style.top=(docTop-8)+'px'; hl.style.width=(r.width+16)+'px'; hl.style.height=(hh+16)+'px';
+    const dots=STEPS.map((_,i)=>`<i class="${i===idx?'on':''}"></i>`).join('');
+    card.innerHTML=`<div class="tk">${st.k}</div><p>${st.html}</p><div class="tour-nav"><div class="dots">${dots}</div>${idx>0?'<button class="tour-btn" id="tprev">Back</button>':''}<button class="tour-btn" id="tskip">Close</button><button class="tour-btn primary" id="tnext">${idx<STEPS.length-1?'Next':'Done'}</button></div>`;
+    let cx, cy;
+    if(fitsRight){ cx=docLeft+r.width+18; cy=docTop; }
+    else { cx=Math.min(docLeft, sx+innerWidth-16-cw); cy=docTop+hh+22; }
+    card.style.left=Math.max(sx+16,cx)+'px'; card.style.top=Math.max(target+16,cy)+'px';
+    $('#tnext').onclick=next; $('#tskip').onclick=stop; const pv=$('#tprev'); if(pv) pv.onclick=()=>{idx=Math.max(0,idx-1);place();};
+    window.scrollTo({top:target, behavior:reduced?'auto':'smooth'});
   }
   function next(){ if(idx>=STEPS.length-1){stop();return;} idx++; place(); }
   function stop(){ root.classList.remove('on'); try{localStorage.setItem(TOURKEY,'seen')}catch(e){} }
