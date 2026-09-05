@@ -1,8 +1,7 @@
 # The right to print
 
-A decision console for on-site metal printing of spare parts, built in August 2026 for an
-application to the Danish Technological Institute's industrial 3D-print centre (Project
-Developer, Industrial 3D Print in Defence R&D). Live at
+A decision console for on-site metal printing of spare parts, built in August 2026 around the
+public material of the Danish Technological Institute's industrial 3D-print centre. Live at
 https://bolgacg.github.io/right-to-print/
 
 It takes a catalogue of spare parts and answers, part by part, the four questions a sustainment
